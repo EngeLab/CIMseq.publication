@@ -1,7 +1,7 @@
 #run from package root
 #source('inst/rawData/countsMgfp/Mouse.gut.architecture.R')
 
-packages <- c("dplyr", "stringr")
+packages <- c("dplyr", "stringr", "CIMseq.publication")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 

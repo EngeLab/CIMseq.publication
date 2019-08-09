@@ -1,7 +1,7 @@
 #run from package root
 #source('./inst/rawData/countsSorted2/Sorted.multiplets.R')
 
-packages <- c("dplyr", "stringr")
+packages <- c("dplyr", "stringr", "CIMseq.publication")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 

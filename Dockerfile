@@ -59,15 +59,15 @@ RUN Rscript -e "BiocManager::install('S4Vectors', update = FALSE)"
 RUN git clone https://github.com/jasonserviss/CIMseq.git --branch devel ~/Github/CIMseq
 RUN Rscript -e "devtools::install('~/Github/CIMseq', dependencies = FALSE)"
 
-# Clone and install CIMseq.testing (needed for data processing functions)
-RUN git clone https://github.com/jasonserviss/CIMseq.testing.git ~/Github/CIMseq.testing
-RUN Rscript -e "devtools::install('~/Github/CIMseq.testing', dependencies = FALSE)"
+# Clone and install CIMseq.publication (needed for data processing functions)
+RUN git clone https://github.com/EngeLab/CIMseq.publication.git ~/Github/CIMseq.publication
+RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
 
 # Run data script
-RUN Rscript -e "setwd('~/Github/CIMseq.testing'); source('./inst/data/data.R'); processRaw()"
+RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/data/data.R'); processRaw()"
 
-# Re-install CIMseq.testing (needed for access to processed data)
-RUN Rscript -e "devtools::install('~/Github/CIMseq.testing', dependencies = FALSE)"
+# Re-install CIMseq.publication (needed for access to processed data)
+#RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
 
 # Run analysis data scripts, analyses, and generate figures
-RUN Rscript -e "setwd('~/Github/CIMseq.testing'); source('./inst/analysis/runAnalysis.R')"
+#RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/analysis/runAnalysis.R')"
