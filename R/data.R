@@ -58,7 +58,7 @@ getMetadataViaLink <- function(link) {
   name <- googledrive::drive_get(as_id(link))$name
   localpath <- file.path(tempdir(), name)
   googledrive::drive_download(as_id(link), localpath, overwrite = TRUE)
-  as_tibble(read.table(localpath))
+  as_tibble(read.table(localpath, stringsAsFactors = FALSE))
 }
 
 #' Rename GFP mouse samples.
