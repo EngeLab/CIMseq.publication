@@ -60,6 +60,7 @@ RUN git clone https://github.com/jasonserviss/CIMseq.git --branch devel ~/Github
 RUN Rscript -e "devtools::install('~/Github/CIMseq', dependencies = FALSE)"
 
 # Clone and install CIMseq.publication (needed for data processing functions)
+RUN touch tmp1.txt
 RUN git clone https://github.com/EngeLab/CIMseq.publication.git ~/Github/CIMseq.publication
 RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
 
@@ -67,7 +68,7 @@ RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = 
 RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/data/data.R'); processRaw()"
 
 # Re-install CIMseq.publication (needed for access to processed data)
-#RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
+RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
 
 # Run analysis data scripts, analyses, and generate figures
 #RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/analysis/runAnalysis.R')"

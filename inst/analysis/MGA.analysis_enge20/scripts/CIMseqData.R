@@ -1,4 +1,4 @@
-packages <- c("CIMseq", "CIMseq.testing", "Seurat", "stringr", "dplyr")
+packages <- c("CIMseq", "CIMseq.publication", "Seurat", "stringr", "dplyr")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 
