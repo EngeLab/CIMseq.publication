@@ -1,0 +1,382 @@
+---
+title: "Mouse colon analysis, 20 classes"
+author: "Jason T. Serviss"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, message = FALSE}
+packages <- c("CIMseq", "CIMseq.data", "tidyverse", "circlize", "printr")
+purrr::walk(packages, library, character.only = TRUE)
+rm(packages)
+
+##DATA
+load('../data/CIMseqData.rda')
+load('../data/sObj.rda')
+load('../../MGA.analysis_enge20/data/pal.rda')
+
+#there are 5 cells that were classified as colon but sorted as SI. These have to
+#be removed manually
+c <- getData(cObjSng, "classification")
+s <- names(c[c %in% c("4", "9")])
+i <- which(colnames(getData(cObjSng, "counts")) %in% s)
+cObjSng <- CIMseqSinglets(
+  getData(cObjSng, "counts")[, -i],
+  getData(cObjSng, "counts.ercc")[, -i],
+  getData(cObjSng, "dim.red")[-i, ],
+  getData(cObjSng, "classification")[-i]
+)
+```
+
+```{r, eval = TRUE, echo = FALSE}
+#rename classes
+renameClasses <- function(class) {
+  case_when(
+    class == "0" ~ "C.Lgr5+.proximal.2",
+    class == "1" ~ "C.Goblet.distal.1",
+    class == "2" ~ "C.Colonocytes",
+    class == "5" ~ "C.Lgr5+.distal",
+    class == "6" ~ "C.TA.distal",
+    class == "7" ~ "C.Lgr5+.Mki67+",
+    class == "8" ~ "C.Goblet.proximal",
+    class == "10" ~ "C.Goblet.distal.Plet1",
+    class == "13" ~ "C.Lgr5+.proximal.1",
+    class == "14" ~ "Enteroendocrine",
+    class == "15" ~ "Tufft",
+    class == "18" ~ "C.Goblet.Mki67+",
+    class == "19" ~ "Blood",
+    TRUE ~ "error"
+  )
+}
+
+cOrder <- c(
+  "C.Goblet.Mki67+", "C.Goblet.proximal", "C.Goblet.distal.Plet1", 
+  "C.Lgr5+.proximal.2", "C.Lgr5+.proximal.1", "C.Lgr5+.distal", 
+  "C.Lgr5+.Mki67+", "C.TA.distal", "C.Colonocytes", 
+  "C.Goblet.distal.1",  "Enteroendocrine", "Tufft", "Blood"
+)
+
+
+getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+fractions <- getData(sObj, "fractions")
+fractions <- fractions[, !colnames(fractions) %in% c("4", "9")]
+colnames(fractions) <- renameClasses(colnames(fractions))
+sObj@fractions <- fractions
+```
+
+
+### Fig 1: Classes
+```{r, fig.align="center", fig.width=10, fig.height=8}
+p <- plotUnsupervisedClass(cObjSng, cObjMul, pal)
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.classes.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+
+```
+
+### Fig 2: Cell type gene expression
+```{r, fig.align="center", fig.width=10, fig.height=8}
+p <- plotUnsupervisedMarkers(
+  cObjSng, cObjMul,
+  c("Lgr5", "Ptprc", "Chga", "Dclk1", "Slc26a3", "Atoh1"),
+  pal = RColorBrewer::brewer.pal(8, "Set1")
+)
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.markers.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+
+```
+
+### Fig 3: Cell cycle
+```{r, fig.align="center", fig.width=10, fig.height=8}
+p <- plotUnsupervisedMarkers(
+  cObjSng, cObjMul, c("Mki67"),
+  pal = RColorBrewer::brewer.pal(8, "Set1")
+)
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.Mki67.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+```
+
+### Fig 4: Connections per multiplet
+```{r}
+adj <- adjustFractions(cObjSng, cObjMul, sObj)
+as.data.frame(table(apply(adj, 1, sum)))
+```
+
+### Fig 5: Fraction histogram
+```{r, fig.align="center", fig.width=10, fig.height=8}
+tibble(fractions = c(fractions)) %>%
+  ggplot() +
+  geom_histogram(aes(fractions), binwidth = 0.01) +
+  theme_bw()
+```
+
+### Fig 6: Detected cell types vs. cost
+```{r, fig.align="center", fig.width=10, fig.height=8}
+tibble(
+  nCellTypes = apply(adj, 1, sum),
+  cost = getData(sObj, "costs")
+) %>%
+  ggplot() +
+  geom_boxplot(aes(nCellTypes, cost, group = nCellTypes)) +
+  scale_x_continuous(name = "Detected cell types", breaks = 0:max(apply(adj, 1, sum))) +
+  theme_bw()
+```
+
+### Fig 7: Estimated cell numbers vs. cost
+```{r, fig.align="center", fig.width=10, fig.height=8}
+tibble(
+  sample = names(getData(sObj, "costs")),
+  cost = unname(getData(sObj, "costs"))
+) %>%
+  inner_join(
+    select(estimateCells(cObjSng, cObjMul), sample, estimatedCellNumber), 
+    by = "sample"
+  ) %>%
+  mutate(estimatedCellNumber = round(estimatedCellNumber)) %>%
+  ggplot() +
+  geom_boxplot(aes(estimatedCellNumber, cost, group = estimatedCellNumber)) +
+  scale_x_continuous(
+    name = "ERCC estimated cell number", 
+    breaks = 0:max(round(pull(estimateCells(cObjSng, cObjMul), estimatedCellNumber)))
+  ) +
+  theme_bw()
+```
+
+### Fig 8: Estimated cell number vs. Detected cell number
+```{r, fig.align="center", fig.width=10, fig.height=8}
+ercc <- filter(estimateCells(cObjSng, cObjMul), sampleType == "Multiplet")
+nConnections <- apply(adj, 1, sum)
+nConnections <- nConnections[match(ercc$sample, names(nConnections))]
+tibble(
+  detectedConnections = round(nConnections),
+  estimatedCellNumber = round(ercc$estimatedCellNumber)
+) %>%
+  ggplot() +
+  geom_boxplot(aes(estimatedCellNumber, detectedConnections, group = estimatedCellNumber)) +
+  scale_x_continuous(
+    name = "ERCC estimated cell number", 
+    breaks = 0:max(round(ercc$estimatedCellNumber))
+  ) +
+  scale_y_continuous(
+    name = "Detected cell number",
+    breaks = 0:max(round(nConnections))
+  ) +
+  theme_bw()
+```
+
+### Fig 9: Detected cell number vs. Total counts
+```{r, fig.align="center", fig.width=10, fig.height=8}
+tibble(
+  sample = names(nConnections),
+  detectedConnections = nConnections
+) %>%
+  inner_join(tibble(
+    sample = colnames(getData(cObjMul, "counts")),
+    total.counts = colSums(getData(cObjMul, "counts"))
+  ), by = "sample") %>%
+  ggplot() +
+  geom_boxplot(aes(detectedConnections, total.counts, group = detectedConnections)) +
+  scale_x_continuous(
+    name = "Detected cell number", 
+    breaks = 0:max(nConnections)
+  ) +
+  scale_y_continuous(name = "Total counts") +
+  theme_bw()
+```
+
+### Fig 10: Detected cell number vs. Total ERCC counts
+```{r, fig.align="center", fig.width=10, fig.height=8}
+tibble(
+  sample = names(nConnections),
+  detectedConnections = nConnections
+) %>%
+  inner_join(tibble(
+    sample = colnames(getData(cObjMul, "counts")),
+    total.ercc = colSums(getData(cObjMul, "counts.ercc"))
+  ), by = "sample") %>%
+  ggplot() +
+  geom_boxplot(aes(detectedConnections, total.ercc, group = detectedConnections)) +
+  scale_x_continuous(
+    name = "Detected cell number", 
+    breaks = 0:max(nConnections)
+  ) +
+  scale_y_continuous(name = "Total ERCC counts") +
+  theme_bw()
+```
+
+### Fig 11: Relative frequency of singlets vs. deconvoluted multiplets
+
+```{r, fig.align="center", fig.width=10, fig.height=8}
+singlets <- c(table(getData(cObjSng, "classification")))
+singlets <- singlets / sum(singlets)
+deconv <- colSums(adjustFractions(cObjSng, cObjMul, sObj))
+deconv <- deconv[match(names(singlets), names(deconv))]
+deconv <- deconv / sum(deconv)
+if(!identical(names(singlets), names(deconv))) stop("name mismatch")
+
+p <- tibble(
+  class = names(singlets),
+  singlet.freq = singlets,
+  multiplet.freq = deconv
+) %>%
+  ggplot() +
+  geom_point(aes(singlet.freq, multiplet.freq, colour = class), size = 3) +
+  scale_colour_manual(values = pal[order(names(pal))]) +
+  xlim(min(c(deconv, singlets)), max(c(deconv, singlets))) +
+  ylim(min(c(deconv, singlets)), max(c(deconv, singlets))) +
+  geom_abline(slope = 1, intercept = 0, lty = 3, colour = "grey") +
+  labs(x = "Singlet relative frequency", y = "Multiplet relative frequency") +
+  guides(colour = guide_legend(title = "Cell Type")) +
+  theme_bw()
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.sngMulRelFreq.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+```
+
+### Fig 12: All connections
+
+```{r, fig.align="center", fig.width=10, fig.height=8}
+plotSwarmCircos(
+  sObj, cObjSng, cObjMul, classOrder = cOrder, classColour = pal[cOrder], 
+  h.ratio = 0.85
+)
+```
+
+### Fig 13: Filtered
+
+Only detected duplicates, triplicates, and quadruplicates.  
+ERCC estimated cell number set to max 4.  
+Weight cutoff = 10.
+Alpha = 1e-3.
+
+```{r, fig.align="center", fig.width=14, fig.height=12}
+# adj <- adjustFractions(cObjSng, cObjMul, sObj, binary = TRUE)
+# samples <- rownames(adj)
+# rs <- rowSums(adj)
+# keep <- rs == 2 | rs == 3 | rs == 4
+
+plotSwarmCircos(
+  sObj, cObjSng, cObjMul, weightCut = 10, 
+  classOrder = cOrder, theoretical.max = 4, classColour = pal[cOrder], 
+  h.ratio = 0.85, alpha = 1e-3
+)
+
+pdf('../figures/MGA.enge20.circos.pdf', width = 9.5, height = 9.5, onefile=FALSE)
+plotSwarmCircos(
+  sObj, cObjSng, cObjMul, weightCut = 10, 
+  classOrder = cOrder, theoretical.max = 4, classColour = pal[cOrder], 
+  h.ratio = 0.85, alpha = 1e-3
+)
+dev.off()
+```
+
+Calculate the probability of observing Lgr5 expression when Plet1 is or is not 
+expressed in Muc2 high expressing multiplets.
+
+```{r, fig.align="center", fig.width=14, fig.height=12}
+p <- getData(cObjMul, "counts.cpm") %>% 
+  .[c("Plet1", "Lgr5", "Muc2"), ] %>%
+  t() %>%
+  matrix_to_tibble("sample") %>%
+  filter(Muc2 > 3000) %>% #include only Muc2 high
+  mutate(
+    express.plet1 = if_else(Plet1 > 0, TRUE, FALSE),
+    express.lgr5 = if_else(Lgr5 > 0, TRUE, FALSE)
+  ) %>%
+  group_by(express.plet1, express.lgr5) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  group_by(express.plet1) %>%
+  mutate(total = sum(n)) %>%
+  ungroup() %>%
+  mutate(lgr5.prob = n / total) %>%
+  filter((express.plet1 == TRUE & express.lgr5 == TRUE) | (express.plet1 == FALSE & express.lgr5 == TRUE)) %>%
+  ggplot() + 
+  geom_bar(aes(express.plet1, lgr5.prob), stat = "identity", position = position_dodge(width = 1)) +
+  labs(x = "Plet1 expressed", y = "Lgr5 probability") +
+  ggthemes::theme_few()
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.Lgr5prob.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 90,
+  units = "mm"
+)
+```
+
+```{r}
+pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
+  matrix_to_tibble("sample") %>%
+  filter(C.Goblet.proximal == 1) %>%
+  select(-C.Goblet.proximal) %>%
+  gather(class, binary, -sample) %>%
+  group_by(sample) %>%
+  summarize(others = paste(class[binary == 1], collapse = ", ")) %>%
+  mutate(others = map(others, ~str_split(.x, ", ")[[1]])) %>%
+  unnest() %>%
+  filter(others != "") %>%
+  group_by(others) %>%
+  summarize(prob = n() / nrow(.)) %>% 
+  rename(class = others) %>%
+  full_join(tibble(class = unique(getData(cObjSng, "classification")))) %>%
+  filter(class != "C.Goblet.proximal") %>%
+  replace_na(list(prob = 0))
+
+p <- pdata %>% 
+  ggplot() +
+  geom_bar(aes(class, prob), stat = "identity", position = position_dodge(width = 1)) +
+  geom_text(aes(class, prob + 0.01, label = round(prob, digits = 3))) +
+  theme_bw() +
+  labs(y = "Probability") +
+  theme(axis.title.x = element_blank(), axis.text.x = element_text(angle = 90))
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge20.PletIntProb.pdf',
+  device = cairo_pdf,
+  height = 240,
+  width = 240,
+  units = "mm"
+)
+```
+
+```{r}
+sessionInfo()
+```
+

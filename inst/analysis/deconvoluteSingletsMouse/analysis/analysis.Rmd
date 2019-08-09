@@ -1,0 +1,162 @@
+---
+title: "Mouse singlet deconvolution; Enge only"
+author: "Jason T. Serviss"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, message = FALSE}
+#PACKAGES
+packages <- c("CIMseq", "tidyverse")
+purrr::walk(packages, library, character.only = TRUE)
+rm(packages)
+
+#DATA
+load('../../MGA.analysis_enge20/data/CIMseqData.rda')
+load('../data/sObj.rda')
+
+cObjMul.2 <- CIMseqMultiplets(
+  getData(cObjSng, "counts")[, rownames(getData(sObj, "fractions"))],
+  getData(cObjSng, "counts.ercc")[, rownames(getData(sObj, "fractions"))],
+  getData(cObjMul, "features")
+)
+rm(cObjMul)
+```
+
+```{r}
+renameClasses <- function(class) {
+  case_when(
+    class == "0" ~ "C.Lgr5+.proximal.2",
+    class == "1" ~ "C.Goblet.distal.1",
+    class == "2" ~ "C.Colonocytes",
+    class == "3" ~ "SI.Lgr5+",
+    class == "4" ~ "SI.Lgr5+.Mki67+",
+    class == "5" ~ "C.Lgr5+.distal",
+    class == "6" ~ "C.TA.distal",
+    class == "7" ~ "C.Lgr5+.Mki67+",
+    class == "8" ~ "C.Goblet.proximal",
+    class == "9" ~ "SI.Goblet",
+    class == "10" ~ "C.Goblet.distal.Plet1",
+    class == "11" ~ "SI.TA.late",
+    class == "12" ~ "SI.TA.early",
+    class == "13" ~ "C.Lgr5+.proximal.1",
+    class == "14" ~ "Enteroendocrine",
+    class == "15" ~ "Tufft",
+    class == "16" ~ "SI.Enterocytes",
+    class == "17" ~ "SI.Paneth",
+    class == "18" ~ "C.Goblet.Mki67+",
+    class == "19" ~ "Blood",
+    TRUE ~ "error"
+  )
+}
+
+cOrder <- c(
+  "SI.Paneth", "SI.Lgr5+", "SI.Lgr5+.Mki67+", "SI.TA.early", "SI.TA.late", "SI.Enterocytes", "SI.Goblet", 
+  "C.Goblet.Mki67+", "C.Goblet.proximal", "C.Goblet.distal.Plet1", "C.Lgr5+.proximal.2",
+  "C.Lgr5+.proximal.1", "C.Lgr5+.distal", "C.Lgr5+.Mki67+", "C.TA.distal", "C.Colonocytes", 
+  "C.Goblet.distal.1",  "Enteroendocrine", "Tufft", "Blood"
+)
+
+getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+fractions <- getData(sObj, "fractions")
+colnames(fractions) <- renameClasses(colnames(fractions))
+sObj@fractions <- fractions
+```
+
+```{r, fig.align="center", fig.width = 10, fig.height=8}
+plotUnsupervisedClass(cObjSng, cObjMul.2)
+```
+
+```{r, fig.align="center", fig.width = 12, fig.height=10}
+data <- getCellsForMultiplet(sObj, cObjSng, cObjMul.2, theoretical.max = 4, drop = FALSE) %>%
+  inner_join(tibble(sample = colnames(getData(cObjSng, "counts")), class = getData(cObjSng, "classification")))
+```
+
+Precision: within any given class (defined by unsupervised classification) what
+fraction of times is a sample of that class devonvoluted correctly.
+
+```{r}
+data %>%
+  mutate(correct = cells == class) %>%
+  group_by(class) %>%
+  summarize(precision = sum(correct) / n()) %>%
+  arrange(precision) %>%
+  print(n = nrow(.))
+```
+
+```{r, echo = FALSE}
+pdf('../figures/table.pdf')
+data %>%
+  mutate(correct = cells == class) %>%
+  group_by(class) %>%
+  summarize(precision = sum(correct) / n()) %>%
+  arrange(precision) %>%
+  mutate(precision = round(precision, digits = 3)) %>%
+  rename(Class = class, Precision = precision) %>%
+  gridExtra::grid.table(., rows = rep("", nrow(.)))
+invisible(dev.off())
+```
+
+<br></br>
+
+Precision for whole all deconvolutions (i.e. not divided by class)
+```{r}
+data %>%
+  mutate(correct = cells == class) %>% 
+  pull(correct) %>% 
+  sum() / nrow(data)
+```
+
+<br></br>
+
+Mean precision per class
+```{r}
+data %>%
+  mutate(correct = cells == class) %>%
+  group_by(class) %>%
+  summarize(precision = sum(correct) / n()) %>% 
+  pull(precision) %>% 
+  mean()
+```
+
+```{r, fig.align="center", fig.width = 12, fig.height=10, echo = FALSE, eval = FALSE}
+data %>% 
+  count(class, cells) %>%
+  group_by(class) %>%
+  filter(cells != class) %>%
+  #mutate(n = 100 * (n / sum(n))) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_tile(aes(class, cells, fill = n)) +
+  scale_fill_viridis_c() +
+  ggthemes::theme_few() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+```{r, fig.align="center", fig.width = 12, fig.height=10, echo = FALSE, eval = FALSE}
+adj <- adjustFractions(cObjSng, cObjMul.2, sObj, binary = TRUE)
+samples <- rownames(adj)
+rs <- rowSums(adj)
+keep <- rs == 2 | rs == 3 | rs == 4
+
+
+plotSwarmCircos(
+  filterSwarm(sObj, keep), cObjSng, cObjMul.2, weightCut = 10, 
+  classOrder = cOrder, theoretical.max = 4
+)
+```
+
+Table of detected cell numbers per singlet 
+(perfect: all == 1, acceptable: all == 0 | all == 1)
+
+```{r}
+adj <- adjustFractions(cObjSng, cObjMul.2, sObj, binary = TRUE)
+rs <- rowSums(adj)
+table(rs)
+```
+

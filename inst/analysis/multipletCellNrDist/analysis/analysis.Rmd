@@ -1,0 +1,47 @@
+---
+title: "Distribution of cell numbers in multiplets"
+author: "Jason T. Serviss"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, message = FALSE}
+#PACKAGES
+packages <- c("CIMseq", "CIMseq.data", "tidyverse", "ggthemes")
+purrr::walk(packages, library, character.only = TRUE)
+rm(packages)
+
+#DATA
+d <- read_tsv('../data/Multiplets_cellNumberFreq.txt')
+```
+
+```{r, fig.align="center", fig.width = 10, fig.height=8}
+d <- d %>%
+  gather(n.cells, count, -file) %>%
+  mutate(n.cells = as.integer(str_replace(n.cells, "(.).*", "\\1"))) %>%
+  group_by(n.cells) %>%
+  summarize(n = sum(count))
+
+p <- d %>%
+  ggplot() +
+  geom_bar(aes(n.cells, n), stat = "identity") +
+  scale_x_continuous(breaks = 1:max(pull(d, n))) +
+  theme_bw() +
+  labs(y = "Count", x = "Cells (n)")
+
+p 
+
+ggsave(
+  plot = p,
+  filename = '../figures/multipletCellNrDist.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 120,
+  units = "mm"
+)
+```

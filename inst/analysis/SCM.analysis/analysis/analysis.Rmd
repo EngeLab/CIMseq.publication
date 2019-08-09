@@ -1,0 +1,282 @@
+---
+title: "Testing Poisson Swarm Algorithm with Sorted Multiplets Dataset"
+author: "Jason T. Serviss"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, message = FALSE}
+#PACKAGES
+packages <- c(
+  "CIMseq", "CIMseq.data", "CIMseq.testing", "printr", "ggthemes", "dplyr", 
+  "ggplot2", "tidyr", "purrr", "stringr", "readr"
+)
+purrr::walk(packages, library, character.only = TRUE)
+rm(packages)
+
+##DATA
+load("../data/CIMseqData.rda")
+load("../data/sObj.rda")
+
+#rename classes
+renameClasses <- function(class) {
+  case_when(
+    class == "0" ~ "A375",
+    class == "1" ~ "HCT116",
+    class == "2" ~ "HOS",
+    TRUE ~ "error"
+  )
+}
+
+getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+fractions <- getData(sObj, "fractions")
+colnames(fractions) <- renameClasses(colnames(fractions))
+sObj@fractions <- fractions
+```
+
+```{r, echo = FALSE}
+mul.stat <- SCM.Meta %>% 
+  filter(!filtered, cellNumber == "Multiplet") %>% 
+  mutate(n = map_int(cellTypes, ~length(str_split(.x, "-")[[1]]))) %>% 
+  count(n) %>% 
+  arrange(n) %>% 
+  pull(nn)
+```
+
+Dataset info  
+`r ncol(getData(cObjSng, "counts"))` singlets and 
+`r ncol(getData(cObjMul, "counts"))` multiplets are included in the final 
+dataset. The dataset includes `r mul.stat` multiplets with 2, 3, and 4 cells,
+respectivley.
+<br></br>
+
+ERCC estimated cell number
+```{r, fig.align="center", fig.width=10, fig.height=8}
+#Markdown
+plotCountsERCC(cObjSng, cObjMul)
+
+#PDF
+p <- plotCountsData(cObjSng, cObjMul) %>%
+  ggplot(aes(x = `Sample type`, y = `Estimated cell number`)) +
+  geom_jitter(height = 0, width = 0.25, size = 0.5, alpha = 0.75, shape = 16) +
+  labs(y = "Estimated cell number") +
+  scale_y_continuous(
+    name = "Estimated cell number",
+    expand = c(0, 0),
+    sec.axis = sec_axis(
+      trans = ~ convertToERCC(., cObjSng, cObjMul),
+      name = "% ERCC"
+    )
+  ) +
+  theme_few() +
+  theme(axis.title.x = element_blank())
+
+ggsave(
+  plot = p,
+  filename = '../figures/SCM.ercc.pdf',
+  device = cairo_pdf,
+  height = 60,
+  width = 60,
+  units = "mm"
+)
+
+```
+
+Estimated vs. actual cell number
+```{r, fig.align="center", fig.width=10, fig.height=8}
+p <- plotCountsData(cObjSng, cObjMul) %>%
+  inner_join(select(SCM.Meta, sample, cellTypes), by = c("Sample" = "sample")) %>%
+  mutate(`Real cell number` = map_int(cellTypes, function(x) {
+    str_split(x, "-")[[1]] %>% length()
+  })) %>%
+  ggplot(aes(x = `Real cell number`, y = `Estimated cell number`, colour = )) +
+  geom_boxplot(aes(group = `Real cell number`)) +
+  labs(x = "Real cell number", y = "Estimated cell number") +
+  theme_bw()
+
+p
+
+ggsave(
+  plot = p,
+  filename = '../figures/SCM.estimatedVSactual.pdf',
+  device = cairo_pdf,
+  height = 60,
+  width = 60,
+  units = "mm"
+)
+```
+
+Cell type specific genes only co-expressed in multiplets
+```{r, fig.align="center", fig.width=10, fig.height=8}
+markers <- c("CD74", "ACTG2")
+plotCountsMarkers(cObjSng, cObjMul, markers) +
+  guides(colour = guide_legend(title = "Sample type"))
+
+p <- plotCountsData(cObjSng, cObjMul, markers) %>%
+  ggplot(aes(CD74, ACTG2, colour = `Sample type`)) +
+  geom_point(alpha = 0.75, shape = 16, size = 0.5) +
+  scale_colour_manual(values = c("#1c54a8", "#f63b32")) +
+  theme_few() +
+  theme(legend.position = "top", legend.title = element_blank()) +
+  guides(colour = guide_legend(override.aes = list(size = 1), title = NULL))
+
+#genes values are log2 + 1 scaled to [0, 1]
+ggsave(
+  plot = p,
+  filename = '../figures/SCM.counts.markers.pdf',
+  device = cairo_pdf,
+  height = 60,
+  width = 60,
+  units = "mm"
+)
+```
+
+Unsupervised classification of singlets
+```{r, fig.align="center", fig.width=10, fig.height=8}
+plotUnsupervisedClass(cObjSng, cObjMul)
+p <- plotCountsData(cObjSng, cObjMul) %>%
+  filter(`Sample type` == "Singlet") %>%
+  ggplot(aes_string(x = '`dim.red dim 1`', y = '`dim.red dim 2`')) +
+  geom_point(aes_string(colour = 'Classification'), alpha = 0.75, shape = 16, size = 0.5) +
+  scale_colour_manual(values = col40()) +
+  theme_few() +
+  theme(legend.position = "top") +
+  guides(colour = guide_legend(override.aes = list(size = 1), title = NULL)) +
+  labs(x = "UMAP dim 1", y = "UMAP dim 2")
+
+ggsave(
+  plot = p,
+  filename = '../figures/SCM.classes.pdf',
+  device = cairo_pdf,
+  height = 60,
+  width = 60,
+  units = "mm"
+)
+```
+
+
+```{r, fig.align="center", fig.width=10, fig.height=8, eval = FALSE}
+adjusted <- adjustFractions(cObjSng, cObjMul, sObj, binary = FALSE)
+inner_join(
+    tibble(sample = rownames(adjusted), `Adjusted estimated cell number` = rowSums(adjusted)),
+    select(SCM.Meta, sample, cellTypes),
+    by = "sample"
+) %>%
+  mutate(`Real cell number` = map_int(cellTypes, function(x) {
+    str_split(x, "-")[[1]] %>% length()
+  })) %>%
+  ggplot() +
+  geom_boxplot(aes(`Real cell number`, `Adjusted estimated cell number`, group = `Real cell number`)) +
+  theme_bw() +
+  labs(x = "Real cell number", y = "Adjusted estimated cell number")
+```
+
+### Show number of expected edges vs number of observed edges
+
+```{r, fig.align="center", fig.width=10, fig.height=8}
+known <- setupPlate(filter(SCM.Meta, !filtered), fill = 1)
+res <- checkResults(sObj, known, cObjSng, cObjMul)
+
+d <- getCellsForMultiplet(sObj, cObjSng, cObjMul) %>%
+  count(cells)
+
+e <- getCellsForMultiplet(known, cObjSng, cObjMul) %>%
+  count(cells)
+
+data <- full_join(e, d, by = "cells") %>% 
+  rename(`Cell type` = cells, `Expected (n)` = n.x, `Detected (n)` = n.y)
+
+data
+
+pdf('../figures/figure1.pdf')
+data %>%
+  rename(Expected = `Expected (n)`, Detected = `Detected (n)`) %>%
+  gridExtra::grid.table(., rows = rep("", nrow(data)))
+invisible(dev.off())
+```
+
+### Show average stats for multiplets dependant on the number of cell in the multiplet.
+
+```{r, fig.align="center", fig.width=10, fig.height=8}
+data <- res %>%
+  inner_join(SCM.Meta, by = "sample") %>%
+  mutate(`Cells (n)` = str_count(cellTypes, "-") + 1) %>%
+  group_by(`Cells (n)`) %>%
+  summarize(
+    n = n(),
+    `TPR (mean)` = round(mean(TPR, na.rm = TRUE), digits = 3),
+    `TNR (mean)` = round(mean(TNR, na.rm = TRUE), digits = 3),
+    `MCR (mean)` = 1 - round(mean(ACC, na.rm = TRUE), digits = 3)
+  )
+
+data
+
+pdf('../figures/figure2.pdf')
+data %>%
+  rename(TPR = `TPR (mean)`, TNR = `TNR (mean)`, MCR = `MCR (mean)`) %>%
+  gridExtra::grid.table(., rows = rep("", nrow(data)))
+invisible(dev.off())
+```
+
+### Show average stats for multiplets dependant on the combination of cells in the multiplet.
+
+```{r, fig.align="center", fig.width=10, fig.height=8}
+data <- res %>%
+  inner_join(SCM.Meta, by = "sample") %>%
+  mutate(cellTypes = str_replace_all(cellTypes, "-", ", ")) %>%
+  rename(`Cells in multiplet` = cellTypes) %>%
+  group_by(`Cells in multiplet`) %>%
+  summarize(
+    n = n(),
+    `TPR (mean)` = round(mean(TPR, na.rm = TRUE), digits = 2),
+    `TNR (mean)` = round(mean(TNR, na.rm = TRUE), digits = 2),
+    `MCR (mean)` = 1 - round(mean(ACC, na.rm = TRUE), digits = 2)
+  )
+
+data
+
+pdf('../figures/figure3.pdf')
+data %>%
+  rename(TPR = `TPR (mean)`, TNR = `TNR (mean)`, MCR = `MCR (mean)`) %>%
+  gridExtra::grid.table(., rows = rep("", nrow(data)))
+invisible(dev.off())
+```
+
+<br></br>
+
+### Print all stats.
+
+Cell number per class
+```{r}
+select(cellNumberPerClass(cObjSng, cObjMul), class, medianCellNumber)
+
+print <- res %>%
+  inner_join(select(SCM.Meta, sample, cellTypes), by = "sample") %>%
+  mutate(`Cells sorted` = map_chr(cellTypes, ~paste(str_split(.x, "-")[[1]], collapse = ", "))) %>%
+  inner_join(matrix_to_tibble(getData(sObj, "fractions"), "sample"), by = "sample") %>%
+  mutate(
+    HOS = round(HOS, digits = 5), 
+    HCT116 = round(HCT116, digits = 5), 
+    A375 = round(A375, digits = 5)
+  ) %>%
+  unite(fractions, HOS, HCT116, A375, sep = ", ") %>%
+  rename("fractions (HOS, HCT116, A375)" = fractions) %>%
+  inner_join(matrix_to_tibble(adjustFractions(cObjSng, cObjMul, sObj, binary = TRUE), "sample"), by = "sample") %>%
+  unite(`adj. fractions`, HOS, HCT116, A375, sep = ", ") %>%
+  inner_join(select(estimateCells(cObjSng, cObjMul), sample, estimatedCellNumber), by = "sample") %>%
+  select(
+    sample, `Cells sorted`, `fractions (HOS, HCT116, A375)`, `adj. fractions`, estimatedCellNumber, tp:ACC
+  )
+
+as.data.frame(print)
+```
+
+```{r}
+sessionInfo()
+```
+
