@@ -14,11 +14,12 @@
 #' @importFrom dplyr case_when
 
 palette <- function(type) {
-  case_when(
-    type == "total" ~ .palette.total(),
-    type == "si" ~ .palette.si(),
-    type == "c" ~ .palette.c()
+  out <- case_when(
+    type == "total" ~ list(.palette.total()),
+    type == "si" ~ list(.palette.si()),
+    type == "c" ~ list(.palette.c())
   )
+  out[[1]]
 }
 
 .palette.total <- function() {
