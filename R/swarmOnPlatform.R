@@ -41,6 +41,7 @@ runSwarmMultiprocess <- function(
     psoControl = list(eps.stagnate = eps.stagnate, maxit.stagnate = maxit.stagnate)
   )
   print(paste0("Finished deconvolution at ", Sys.time()))
+  if(!dir.exists('data')) dir.create('data')
   save(sObj, file = file.path(currPath, "data/sObj.rda"))
 }
 
@@ -77,6 +78,7 @@ runSwarmMultiprocess <- function(
     cObjSng, cObjMul, maxiter = 100, swarmsize = 500, nSyntheticMultiplets = 400
   )
   print(paste0("Finished deconvolution at ", Sys.time()))
+  if(!dir.exists('data')) dir.create('data')
   save(sObj, file = file.path(currPath, "data/sObj.rda"))
 }
 
