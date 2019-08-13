@@ -36,7 +36,7 @@ if(!is.na(args[1])) {
   
 } else {
   library(CIMseq)
-  library(CIMseq.testing)
+  library(CIMseq.publication)
   
   #gives 620 swarm members
   baseSeed <- 43892

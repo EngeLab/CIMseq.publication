@@ -11,7 +11,7 @@ editor_options:
 ---
 
 ```{r, message = FALSE}
-packages <- c("CIMseq", "CIMseq.data", "tidyverse", "circlize", "printr")
+packages <- c("CIMseq", "CIMseq.publication", "tidyverse", "circlize", "printr")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 

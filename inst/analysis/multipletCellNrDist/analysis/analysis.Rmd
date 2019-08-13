@@ -12,7 +12,7 @@ editor_options:
 
 ```{r, message = FALSE}
 #PACKAGES
-packages <- c("CIMseq", "CIMseq.data", "tidyverse", "ggthemes")
+packages <- c("CIMseq", "CIMseq.publication", "tidyverse", "ggthemes")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 

@@ -30,7 +30,7 @@ if(!is.na(args[1])) {
   
 } else {
   library(CIMseq)
-  library(CIMseq.testing)
+  library(CIMseq.publication)
   
   #gives swarmsize 590
   init <- cbind(

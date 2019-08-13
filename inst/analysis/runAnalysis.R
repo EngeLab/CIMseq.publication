@@ -1,4 +1,5 @@
 library(purrr)
+library(CIMseq.publication)
 
 #ARGUMENTS
 directories <- c(
@@ -59,6 +60,7 @@ generateData <- function(directory) {
 #re-run analysis
 runAnalysis <- function(directory) {
   home <- getwd()
+  print(paste0("Processing ", basename(directory)))
   setwd(directory)
   analysis <- list.files('analysis', full.names = TRUE, pattern = ".Rmd")
   for(j in 1:length(analysis)) {
@@ -86,7 +88,7 @@ generateFigures <- function(figureSpecs, out, name) {
   }
   
   rmarkdown::render(
-    tmp, output_format = "html_document", output_dir = out, output_file = name
+    tmp, output_format = "html_document", output_dir = out, output_file = paste0(name, ".html")
   )
 }
 

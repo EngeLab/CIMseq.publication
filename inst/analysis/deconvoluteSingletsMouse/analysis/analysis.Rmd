@@ -1,5 +1,5 @@
 ---
-title: "Mouse singlet deconvolution; Enge only"
+title: "Mouse singlet deconvolution"
 author: "Jason T. Serviss"
 date: "`r Sys.Date()`"
 output:
@@ -30,42 +30,10 @@ rm(cObjMul)
 ```
 
 ```{r}
-renameClasses <- function(class) {
-  case_when(
-    class == "0" ~ "C.Lgr5+.proximal.2",
-    class == "1" ~ "C.Goblet.distal.1",
-    class == "2" ~ "C.Colonocytes",
-    class == "3" ~ "SI.Lgr5+",
-    class == "4" ~ "SI.Lgr5+.Mki67+",
-    class == "5" ~ "C.Lgr5+.distal",
-    class == "6" ~ "C.TA.distal",
-    class == "7" ~ "C.Lgr5+.Mki67+",
-    class == "8" ~ "C.Goblet.proximal",
-    class == "9" ~ "SI.Goblet",
-    class == "10" ~ "C.Goblet.distal.Plet1",
-    class == "11" ~ "SI.TA.late",
-    class == "12" ~ "SI.TA.early",
-    class == "13" ~ "C.Lgr5+.proximal.1",
-    class == "14" ~ "Enteroendocrine",
-    class == "15" ~ "Tufft",
-    class == "16" ~ "SI.Enterocytes",
-    class == "17" ~ "SI.Paneth",
-    class == "18" ~ "C.Goblet.Mki67+",
-    class == "19" ~ "Blood",
-    TRUE ~ "error"
-  )
-}
-
-cOrder <- c(
-  "SI.Paneth", "SI.Lgr5+", "SI.Lgr5+.Mki67+", "SI.TA.early", "SI.TA.late", "SI.Enterocytes", "SI.Goblet", 
-  "C.Goblet.Mki67+", "C.Goblet.proximal", "C.Goblet.distal.Plet1", "C.Lgr5+.proximal.2",
-  "C.Lgr5+.proximal.1", "C.Lgr5+.distal", "C.Lgr5+.Mki67+", "C.TA.distal", "C.Colonocytes", 
-  "C.Goblet.distal.1",  "Enteroendocrine", "Tufft", "Blood"
-)
-
-getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+#rename classes
+getData(cObjSng, "classification") <- renameClasses.MGA(getData(cObjSng, "classification"))
 fractions <- getData(sObj, "fractions")
-colnames(fractions) <- renameClasses(colnames(fractions))
+colnames(fractions) <- renameClasses.MGA(colnames(fractions))
 sObj@fractions <- fractions
 ```
 
@@ -148,7 +116,7 @@ keep <- rs == 2 | rs == 3 | rs == 4
 
 plotSwarmCircos(
   filterSwarm(sObj, keep), cObjSng, cObjMul.2, weightCut = 10, 
-  classOrder = cOrder, theoretical.max = 4
+  classOrder = classOrder.MGA('total'), theoretical.max = 4
 )
 ```
 

@@ -13,7 +13,7 @@ editor_options:
 ```{r, message = FALSE}
 #PACKAGES
 packages <- c(
-  "CIMseq", "CIMseq.data", "CIMseq.testing", "printr", "ggthemes", "dplyr", 
+  "CIMseq", "CIMseq.publication", "printr", "ggthemes", "dplyr", 
   "ggplot2", "tidyr", "purrr", "stringr", "readr"
 )
 purrr::walk(packages, library, character.only = TRUE)
@@ -44,7 +44,7 @@ sObj@fractions <- fractions
 mul.stat <- SCM.Meta %>% 
   filter(!filtered, cellNumber == "Multiplet") %>% 
   mutate(n = map_int(cellTypes, ~length(str_split(.x, "-")[[1]]))) %>% 
-  count(n) %>% 
+  dplyr::count(n) %>% 
   arrange(n) %>% 
   pull(nn)
 ```
@@ -184,10 +184,10 @@ known <- setupPlate(filter(SCM.Meta, !filtered), fill = 1)
 res <- checkResults(sObj, known, cObjSng, cObjMul)
 
 d <- getCellsForMultiplet(sObj, cObjSng, cObjMul) %>%
-  count(cells)
+  dplyr::count(cells)
 
 e <- getCellsForMultiplet(known, cObjSng, cObjMul) %>%
-  count(cells)
+  dplyr::count(cells)
 
 data <- full_join(e, d, by = "cells") %>% 
   rename(`Cell type` = cells, `Expected (n)` = n.x, `Detected (n)` = n.y)

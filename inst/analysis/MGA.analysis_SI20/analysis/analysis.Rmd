@@ -13,7 +13,7 @@ editor_options:
 #add table of connections found per number of cells in multiplet
 
 ```{r, message = FALSE}
-packages <- c("CIMseq", "CIMseq.data", "tidyverse", "circlize", "printr")
+packages <- c("CIMseq", "CIMseq.publication", "tidyverse", "circlize", "printr")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 
