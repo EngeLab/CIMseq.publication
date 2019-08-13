@@ -26,7 +26,7 @@ ss <- getData(sObj, "fractions")
 colnames(ss) <- c("HOS", "HCT116", "A375")
 sObj@fractions <- ss
 
-if(!"data" %in% list.dirs(currPath, full.names = FALSE)) system('mkdir data')
+if(!dir.exists('data')) dir.create('data')
 save(cObjSng, cObjMul, sObj, file = file.path(currPath, 'data/algoOutput.rda'))
 
 renameClasses <- function(class) {
@@ -39,5 +39,6 @@ report <- unnest(getData(sObj, "stats"))
 colnames(report)[6:8] <- renameClasses(colnames(report)[6:8])
 
 save(report, file = file.path(currPath, "data/report.rda"))
+if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))
 

@@ -19,6 +19,7 @@ rm(packages)
 #DATA
 load('../../MGA.analysis_enge20/data/CIMseqData.rda')
 load('../data/sObj.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 
 cObjMul.2 <- CIMseqMultiplets(
   getData(cObjSng, "counts")[, rownames(getData(sObj, "fractions"))],

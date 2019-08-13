@@ -128,6 +128,9 @@ sObj <- CIMseqSwarm(
 )
 print(paste0("Finished deconvolution at ", Sys.time()))
 
+if(!dir.exists('data')) dir.create('data')
 save(sObj, file = file.path(currPath, "data/sObj.rda"))
+
+if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))
 print("finished")

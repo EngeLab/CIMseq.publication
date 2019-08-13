@@ -22,6 +22,7 @@ rm(packages)
 ##DATA
 load("../data/CIMseqData.rda")
 load("../data/sObj.rda")
+if(!dir.exists('../figures')) dir.create('../figures')
 
 #rename classes
 renameClasses <- function(class) {

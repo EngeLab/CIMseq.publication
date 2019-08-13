@@ -19,6 +19,7 @@ rm(packages)
 
 #DATA
 load('../data/report.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 ```
 
 

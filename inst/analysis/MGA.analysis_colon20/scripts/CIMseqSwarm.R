@@ -19,10 +19,7 @@ if(!is.na(args[1])) {
   out <- if(is.na(args[2])) {out <- 'tmp'} else {out <- as.character(args[2])}
   
   #gives swarmsize 590
-  init <- cbind(
-    swarmInit(cObjSng, 2, null.weight = 1), 
-    swarmInit(cObjSng, 3, null.weight = 1)
-  )
+  init <- swarmInit(cObjSng, 2, null.weight = 1)
   
   options(future.globals.maxSize = Inf)
   runSwarmUppmax(
@@ -37,8 +34,7 @@ if(!is.na(args[1])) {
   
   #gives swarmsize 590
   init <- cbind(
-    swarmInit(cObjSng, 2, null.weight = 1), 
-    swarmInit(cObjSng, 3, null.weight = 1)
+    swarmInit(cObjSng, 2, null.weight = 1)
   )
   
   options(future.globals.maxSize = Inf)

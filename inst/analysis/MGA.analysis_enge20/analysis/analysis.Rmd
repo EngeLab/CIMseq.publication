@@ -19,6 +19,7 @@ rm(packages)
 load('../data/CIMseqData.rda')
 load('../data/sObj.rda')
 load('../data/pal.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 ```
 
 ```{r, eval = TRUE, echo = FALSE}

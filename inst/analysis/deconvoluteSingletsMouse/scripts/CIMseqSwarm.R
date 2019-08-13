@@ -43,19 +43,16 @@ if(!is.na(args[1])) {
   
 } else {
   library(CIMseq)
-  library(CIMseq.testing)
+  library(CIMseq.publication)
   
   cObjMul.2 <- CIMseqMultiplets(
-    getData(cObjSng, "counts"),
-    getData(cObjSng, "counts.ercc"),
+    getData(cObjSng, "counts")[, 1:10],
+    getData(cObjSng, "counts.ercc")[, 1:10],
     getData(cObjMul, "features")
   )
 
   #gives 1370 swarm members
-  init <- cbind(
-    swarmInit(cObjSng, 2, null.weight = 1, seed = 35466),
-    swarmInit(cObjSng, 3, null.weight = 1, seed = 35466)
-  )
+  init <- swarmInit(cObjSng, 3, null.weight = 1, seed = 35466)
 
   runSwarmMultiprocess(
     cObjSng, cObjMul.2, swarmInit = init, maxiter = 2,
@@ -64,5 +61,6 @@ if(!is.na(args[1])) {
   )
 }
 
+if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo_CIMseqSwarm.txt"))
 print("finished")

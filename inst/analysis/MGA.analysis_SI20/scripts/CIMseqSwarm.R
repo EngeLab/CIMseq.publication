@@ -40,12 +40,7 @@ if(!is.na(args[1])) {
   
   #gives 620 swarm members
   baseSeed <- 43892
-  init <- map(1:2, function(i) {
-    cbind(
-      swarmInit(cObjSng, 2, null.weight = 1, seed = baseSeed + i), 
-      swarmInit(cObjSng, 3, null.weight = 1, seed = baseSeed + i)
-    )
-  }) %>% do.call(cbind, .)
+  init <- swarmInit(cObjSng, 2, null.weight = 1, seed = baseSeed)
 
   options(future.globals.maxSize = Inf)  
   runSwarmMultiprocess(

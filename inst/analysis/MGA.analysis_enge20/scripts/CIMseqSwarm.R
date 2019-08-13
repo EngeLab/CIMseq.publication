@@ -34,15 +34,12 @@ if(!is.na(args[1])) {
   
 } else {
   library(CIMseq)
-  library(CIMseq.data)
   library(CIMseq.publication)
   
   #gives 1370 swarm members
   baseSeed <- 43892
-  init <- cbind(
-      swarmInit(cObjSng, 2, null.weight = 0.5, seed = baseSeed),
-      swarmInit(cObjSng, 3, null.weight = 0.5, seed = baseSeed)
-  )
+  init <- swarmInit(cObjSng, 2, null.weight = 0.5, seed = baseSeed)
+  
   options(future.globals.maxSize = Inf)
   runSwarmMultiprocess(
     cObjSng, cObjMul, swarmInit = init, maxiter = 2, swarmsize = ncol(init),

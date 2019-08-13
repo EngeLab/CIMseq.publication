@@ -11,7 +11,7 @@ directories <- c(
   "visualizingPoissonAlgo", 
   "visualizingSolutionSpace"
 )
-directories <- file.path('./inst/analysis/', directories)
+directories <- file.path('./inst/analysis', directories)
 
 
 allFigures <- list(

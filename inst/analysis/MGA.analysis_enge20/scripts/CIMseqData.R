@@ -151,10 +151,11 @@ cObjSng <- cimseq.data[[1]]
 cObjMul <- cimseq.data[[2]]
 
 #save
-if(!"data" %in% list.dirs(currPath, full.names = FALSE)) system('mkdir data')
+if(!dir.exists('data')) dir.create('data')
 print(paste0("saving data to ", currPath, "."))
 save(cObjSng, cObjMul, file = file.path(currPath, "data/CIMseqData.rda"))
 save(mca, markers, file = file.path(currPath, "data/seurat.rda"))
 
 #write logs
+if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo_CIMseqData.txt"))

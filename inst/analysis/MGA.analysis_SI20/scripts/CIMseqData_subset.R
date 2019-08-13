@@ -47,8 +47,10 @@ cObjMul <- CIMseqMultiplets(
 )
 
 #save
+if(!dir.exists('data')) dir.create('data')
 save(cObjSng, cObjMul, file = file.path(currPath, "data/CIMseqData.rda"))
 save(mca.si, markers, file = file.path(currPath, "data/seurat.rda"))
 
 #write logs
+if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo_CIMseqData.txt"))

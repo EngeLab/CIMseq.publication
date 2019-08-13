@@ -21,6 +21,7 @@ rm(packages)
 load('../data/CIMseqData.rda')
 load('../data/sObj.rda')
 load('../../MGA.analysis_enge20/data/pal.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 
 #there are 2 cells that were classified as colon but sorted as SI. These have to
 #be removed manually

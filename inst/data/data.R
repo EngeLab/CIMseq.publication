@@ -19,3 +19,5 @@ processRaw <- function(
     gc()
   })
 }
+
+processRaw()

@@ -23,6 +23,7 @@ rm(packages)
 load('../../SCM.analysis/data/CIMseqData.rda')
 load('../../SCM.analysis/data/sObj.rda')
 load('../data/syntheticMultiplets.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 
 renameClasses <- function(class) {
   case_when(

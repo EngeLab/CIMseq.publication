@@ -18,6 +18,7 @@ rm(packages)
 
 #DATA
 d <- read_tsv('../data/Multiplets_cellNumberFreq.txt')
+if(!dir.exists('../figures')) dir.create('../figures')
 ```
 
 ```{r, fig.align="center", fig.width = 10, fig.height=8}
@@ -35,7 +36,7 @@ p <- d %>%
   labs(y = "Count", x = "Cells (n)")
 
 p 
-
+if(!dir.exists('../figures')) dir.create('../figures')
 ggsave(
   plot = p,
   filename = '../figures/multipletCellNrDist.pdf',

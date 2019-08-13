@@ -19,6 +19,7 @@ rm(packages)
 load('../data/CIMseqData.rda')
 load('../data/sObj.rda')
 load('../../MGA.analysis_enge20/data/pal.rda')
+if(!dir.exists('../figures')) dir.create('../figures')
 
 #there are 5 cells that were classified as colon but sorted as SI. These have to
 #be removed manually
@@ -68,7 +69,6 @@ fractions <- fractions[, !colnames(fractions) %in% c("4", "9")]
 colnames(fractions) <- renameClasses(colnames(fractions))
 sObj@fractions <- fractions
 ```
-
 
 ### Fig 1: Classes
 ```{r, fig.align="center", fig.width=10, fig.height=8}
