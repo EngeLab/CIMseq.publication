@@ -82,12 +82,12 @@ NULL
 #' @importFrom dplyr case_when
 
 classOrder.MGA <- function(type) {
-  case_when(
-    type == "total" ~ .classOrder.MGA.total(),
-    type == "si" ~ .classOrder.MGA.SI(),
-    type == "c" ~ .classOrder.MGA.C()
+  out <- case_when(
+    type == "total" ~ list(.classOrder.MGA.total()),
+    type == "si" ~ list(.classOrder.MGA.SI()),
+    type == "c" ~ list(.classOrder.MGA.C())
   )
-  
+  out[[1]]
 }
 
 .classOrder.MGA.total <- function() {
