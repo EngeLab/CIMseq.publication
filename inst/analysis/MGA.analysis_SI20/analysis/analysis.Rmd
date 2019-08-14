@@ -20,7 +20,6 @@ rm(packages)
 ##DATA
 load('../data/CIMseqData.rda')
 load('../data/sObj.rda')
-load('../../MGA.analysis_enge20/data/pal.rda')
 if(!dir.exists('../figures')) dir.create('../figures')
 
 #there are 2 cells that were classified as colon but sorted as SI. These have to
@@ -38,37 +37,16 @@ cObjSng <- CIMseqSinglets(
 
 ```{r, eval = TRUE, echo = FALSE}
 #rename classes
-renameClasses <- function(class) {
-  case_when(
-    class == "3" ~ "SI.Lgr5+",
-    class == "4" ~ "SI.Lgr5+.Mki67+",
-    class == "9" ~ "SI.Goblet",
-    class == "11" ~ "SI.TA.late",
-    class == "12" ~ "SI.TA.early",
-    class == "14" ~ "Enteroendocrine",
-    class == "15" ~ "Tufft",
-    class == "16" ~ "SI.Enterocytes",
-    class == "17" ~ "SI.Paneth",
-    class == "19" ~ "Blood",
-    TRUE ~ "error"
-  )
-}
-
-cOrder <- c(
-  "SI.Paneth", "SI.Lgr5+", "SI.Lgr5+.Mki67+", "SI.TA.early", "SI.TA.late", "SI.Enterocytes", "SI.Goblet", 
-  "Enteroendocrine", "Tufft", "Blood"
-)
-
-getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+getData(cObjSng, "classification") <- renameClasses.MGA(getData(cObjSng, "classification"), FALSE)
 fractions <- getData(sObj, "fractions")
 fractions <- fractions[, !colnames(fractions) %in% c("8", "13")]
-colnames(fractions) <- renameClasses(colnames(fractions))
+colnames(fractions) <- renameClasses.MGA(colnames(fractions), FALSE)
 sObj@fractions <- fractions
 ```
 
 ### Fig 1: Classes
 ```{r, fig.align="center", fig.width=10, fig.height=8}
-p <- plotUnsupervisedClass(cObjSng, cObjMul, pal)
+p <- plotUnsupervisedClass(cObjSng, cObjMul, palette('si'))
 p
 ggsave(
   plot = p,
@@ -247,7 +225,7 @@ p <- tibble(
 ) %>%
   ggplot() +
   geom_point(aes(singlet.freq, multiplet.freq, colour = class), size = 3) +
-  scale_colour_manual(values = pal[order(names(pal))]) +
+  scale_colour_manual(values = palette('si')[order(names(palette('si')))]) +
   xlim(min(c(deconv, singlets)), max(c(deconv, singlets))) +
   ylim(min(c(deconv, singlets)), max(c(deconv, singlets))) +
   geom_abline(slope = 1, intercept = 0, lty = 3, colour = "grey") +
@@ -269,7 +247,7 @@ ggsave(
 ### Fig 12: All connections
 ```{r, fig.align="center", fig.width=10, fig.height=8}
 plotSwarmCircos(
-  sObj, cObjSng, cObjMul, classOrder = cOrder, classColour = pal[cOrder],
+  sObj, cObjSng, cObjMul, classOrder = classOrder.MGA('si'), classColour = palette('si')[classOrder.MGA('si')],
   h.ratio = 0.85
 )
 ```
@@ -288,14 +266,14 @@ Weight cutoff = 10.
 
 plotSwarmCircos(
   sObj, cObjSng, cObjMul, weightCut = 10, 
-  classOrder = cOrder, theoretical.max = 4, classColour = pal[cOrder],
+  classOrder = classOrder.MGA('si'), theoretical.max = 4, classColour = palette('si')[classOrder.MGA('si')],
   h.ratio = 0.85, alpha = 1e-3
 )
 
 pdf('../figures/MGA.enge20SI.circos.pdf', width = 9.5, height = 9.5, onefile = FALSE)
 plotSwarmCircos(
   sObj, cObjSng, cObjMul, weightCut = 10, 
-  classOrder = cOrder, theoretical.max = 4, classColour = pal[cOrder],
+  classOrder = classOrder.MGA('si'), theoretical.max = 4, classColour = palette('si')[classOrder.MGA('si')],
   h.ratio = 0.85, alpha = 1e-3
 )
 dev.off()
@@ -306,8 +284,8 @@ other cell types observed in multiplets reported to contain a paneth cell.
 ```{r, fig.align="center", fig.width=14, fig.height=12}
 pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
   matrix_to_tibble("sample") %>%
-  filter(SI.Paneth == 1) %>%
-  select(-SI.Paneth) %>%
+  filter(Paneth == 1) %>%
+  select(-Paneth) %>%
   gather(class, binary, -sample) %>%
   group_by(sample) %>%
   summarize(others = paste(class[binary == 1], collapse = ", ")) %>%
@@ -318,7 +296,7 @@ pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
   summarize(prob = n() / nrow(.)) %>% 
   rename(class = others) %>%
   full_join(tibble(class = unique(getData(cObjSng, "classification")))) %>%
-  filter(class != "SI.Paneth") %>%
+  filter(class != "Paneth") %>%
   replace_na(list(prob = 0))
   
 p <- pdata %>% 

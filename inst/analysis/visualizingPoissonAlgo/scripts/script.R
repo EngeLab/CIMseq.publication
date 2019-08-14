@@ -123,5 +123,6 @@ synthetic.mul <- bind_rows(synthetic.mul.right, synthetic.mul.wrong) %>%
 
 if(!dir.exists('data')) dir.create('data')
 save(synthetic.mul, file = file.path(currPath, "data/syntheticMultiplets.rda"))
+
 if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))

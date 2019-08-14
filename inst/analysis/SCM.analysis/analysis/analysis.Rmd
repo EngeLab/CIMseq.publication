@@ -34,9 +34,9 @@ renameClasses <- function(class) {
   )
 }
 
-getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+getData(cObjSng, "classification") <- renameClasses.SCM(getData(cObjSng, "classification"))
 fractions <- getData(sObj, "fractions")
-colnames(fractions) <- renameClasses(colnames(fractions))
+colnames(fractions) <- renameClasses.SCM(colnames(fractions))
 sObj@fractions <- fractions
 ```
 

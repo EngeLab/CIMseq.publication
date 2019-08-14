@@ -1,5 +1,5 @@
 ---
-title: "Mouse analysis enge - 20 classes"
+title: "Mouse analysis enge"
 author: "Jason T. Serviss"
 date: "`r Sys.Date()`"
 output:
@@ -111,7 +111,7 @@ d <- getData(cObjSng, "counts.cpm")[markers, ] %>%
     Sample = colnames(getData(cObjSng, "counts")), 
     Classification = getData(cObjSng, "classification")
   )) %>%
-  mutate(Classification = parse_factor(Classification, levels = cOrder)) %>%
+  mutate(Classification = parse_factor(Classification, levels = classOrder.MGA('total'))) %>%
   mutate(gene = parse_factor(gene, levels = gene.order)) %>%
   arrange(Classification, gene) %>%
   mutate(Sample = parse_factor(Sample, levels = unique(Sample))) %>% 
@@ -215,7 +215,7 @@ p <- getData(cObjSng, "counts.cpm")[markers, ] %>%
     gene %in% c("Lgr5", "Axin2", "Ascl2") ~ "Wnt target",
     TRUE ~ "error"
   )) %>%
-  mutate(Classification = parse_factor(Classification, levels = cOrder)) %>%
+  mutate(Classification = parse_factor(Classification, levels = classOrder.MGA('total'))) %>%
   mutate(gene = parse_factor(gene, levels = rev(gene.order))) %>%
   mutate(type = parse_factor(type, levels = c("Wnt ligand", "Receptor", "Wnt target"))) %>%
   ggplot() +
@@ -291,7 +291,7 @@ ggsave(
 
 ```{r, fig.align="center", fig.width=14, fig.height=12, eval = TRUE}
 plotSwarmCircos(
-  sObj, cObjSng, cObjMul, weightCut = 0, classOrder = cOrder, 
+  sObj, cObjSng, cObjMul, weightCut = 0, classOrder = classOrder.MGA('total'), 
   classColour = palette('total')[classOrder.MGA('total')], h.ratio = 0.85
 )
 ```
@@ -308,14 +308,14 @@ Weight cutoff = 10.
 
 plotSwarmCircos(
   sObj, cObjSng, cObjMul, weightCut = 10, 
-  classOrder = cOrder, classColour = palette('total')[classOrder.MGA('total')], h.ratio = 0.85,
+  classOrder = classOrder.MGA('total'), classColour = palette('total')[classOrder.MGA('total')], h.ratio = 0.85,
   alpha = 1e-3
 )
 
 pdf('../figures/MGA.enge.circos.pdf', width = 12, height = 10, onefile = FALSE)
 plotSwarmCircos(
   sObj, cObjSng, cObjMul, weightCut = 10, 
-  classOrder = cOrder, classColour = palette('total')[classOrder.MGA('total')], h.ratio = 0.85,
+  classOrder = classOrder.MGA('total'), classColour = palette('total')[classOrder.MGA('total')], h.ratio = 0.85,
   alpha = 1e-3
 )
 invisible(dev.off())

@@ -314,8 +314,8 @@ ggsave(
 ```{r}
 pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
   matrix_to_tibble("sample") %>%
-  filter(C.Goblet.proximal == 1) %>%
-  select(-C.Goblet.proximal) %>%
+  filter(`Goblet Plet1 1` == 1) %>%
+  select(-`Goblet Plet1 1`) %>%
   gather(class, binary, -sample) %>%
   group_by(sample) %>%
   summarize(others = paste(class[binary == 1], collapse = ", ")) %>%
@@ -326,7 +326,7 @@ pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
   summarize(prob = n() / nrow(.)) %>% 
   rename(class = others) %>%
   full_join(tibble(class = unique(getData(cObjSng, "classification")))) %>%
-  filter(class != "C.Goblet.proximal") %>%
+  filter(class != "Goblet Plet1 1") %>%
   replace_na(list(prob = 0))
 
 p <- pdata %>% 

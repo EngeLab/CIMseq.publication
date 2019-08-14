@@ -1,5 +1,5 @@
 ---
-title: "Testing new swarm algo"
+title: "Visualizing poisson algo"
 author: "Jason T. Serviss"
 date: "`r Sys.Date()`"
 output:
@@ -25,18 +25,9 @@ load('../../SCM.analysis/data/sObj.rda')
 load('../data/syntheticMultiplets.rda')
 if(!dir.exists('../figures')) dir.create('../figures')
 
-renameClasses <- function(class) {
-  case_when(
-    class == "0" ~ "A375",
-    class == "1" ~ "HCT116",
-    class == "2" ~ "HOS",
-    TRUE ~ "error"
-  )
-}
-
-getData(cObjSng, "classification") <- renameClasses(getData(cObjSng, "classification"))
+getData(cObjSng, "classification") <- renameClasses.SCM(getData(cObjSng, "classification"))
 fractions <- getData(sObj, "fractions")
-colnames(fractions) <- renameClasses(colnames(fractions))
+colnames(fractions) <- renameClasses.SCM(colnames(fractions))
 sObj@fractions <- fractions
 ```
 
