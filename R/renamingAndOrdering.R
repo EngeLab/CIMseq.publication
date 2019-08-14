@@ -102,17 +102,17 @@ classOrder.MGA <- function(type) {
 
 .classOrder.MGA.SI <- function() {
   c(
-    "SI Paneth", "SI Stem", "SI Transit amplifying", "SI Progenitor early", 
-    "SI Progenitor late", "SI Enterocytes", "SI Goblet", "Enteroendocrine", 
+    "Paneth", "Stem", "Transit amplifying", "Progenitor early", 
+    "Progenitor late", "Enterocytes", "Goblet", "Enteroendocrine", 
     "Tufft", "Blood"
   )
 }
 
 .classOrder.MGA.C <- function() {
   c(
-    "C Goblet proliferating", "C Goblet Plet1 1", "C Goblet Plet1 2", 
-    "C Stem 1", "C Stem 2", "C Stem 3", "C Transit amplifying", 
-    "C Progenitor", "C Colonocytes", "C Goblet Plet1-",  "Enteroendocrine", 
+    "Goblet proliferating", "Goblet Plet1 1", "Goblet Plet1 2", 
+    "Stem 1", "Stem 2", "Stem 3", "Transit amplifying", 
+    "Progenitor", "Colonocytes", "Goblet Plet1-",  "Enteroendocrine", 
     "Tufft", "Blood"
   )
 }

@@ -60,7 +60,7 @@ RUN git clone https://github.com/jasonserviss/CIMseq.git --branch devel ~/Github
 RUN Rscript -e "devtools::install('~/Github/CIMseq', dependencies = FALSE)"
 
 # Clone and install CIMseq.publication (needed for data processing functions)
-RUN touch tmp6.txt
+RUN touch tmp7.txt
 RUN git clone https://github.com/EngeLab/CIMseq.publication.git ~/Github/CIMseq.publication
 RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
 
