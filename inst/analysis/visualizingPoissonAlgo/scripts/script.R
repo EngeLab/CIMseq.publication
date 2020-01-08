@@ -1,5 +1,5 @@
 packages <- c(
-  "CIMseq", "CIMseq.publication", "printr", "dplyr",
+  "CIMseq","CIMseq.data", "CIMseq.testing", "printr", "dplyr",
   "ggthemes", "purrr", "matrixStats", "future", "tibble", "tidyr"
 )
 purrr::walk(packages, library, character.only = TRUE)
@@ -121,8 +121,6 @@ synthetic.mul <- bind_rows(synthetic.mul.right, synthetic.mul.wrong) %>%
     TRUE ~ "error"
   ))
 
-if(!dir.exists('data')) dir.create('data')
+if(!"data" %in% list.dirs(currPath, full.names = FALSE)) system('mkdir data')
 save(synthetic.mul, file = file.path(currPath, "data/syntheticMultiplets.rda"))
-
-if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))

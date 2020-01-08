@@ -28,7 +28,7 @@ palette <- function(type) {
     `C Stem 3` = "#FF8A9A", `C Transit amplifying` = "#6F0062", 
     `C Progenitor` = "#FECFAD",  `C Colonocytes` = "#00489C", 
     `C Goblet proliferating` = "#EEC3FF", `C Goblet Plet1 1` = "#e0a81c", 
-    `C Goblet Plet1 2` = "#922329", `C Goblet Plet1-` = "#FFF69F", 
+    `C Goblet Plet1 2` = "#922329", `C Goblet Plet1 neg.` = "#FFF69F", 
     Tufft = "#ec4339", Enteroendocrine = "#828585", Blood = "#9B9700", 
     `SI Goblet` = "#DDEFFF", `SI Paneth` = "#7B4F4B", `SI Stem` = "#A1C299", 
     `SI Transit amplifying` = "#0AA6D8", `SI Progenitor early` = "#00846F", 
@@ -51,7 +51,7 @@ palette <- function(type) {
     `Stem 3` = "#FF8A9A", `Transit amplifying` = "#6F0062", 
     `Progenitor` = "#FECFAD",  `Colonocytes` = "#00489C", 
     `Goblet proliferating` = "#EEC3FF", `Goblet Plet1 1` = "#e0a81c", 
-    `Goblet Plet1 2` = "#922329", `Goblet Plet1-` = "#FFF69F", 
+    `Goblet Plet1 2` = "#922329", `Goblet Plet1 neg.` = "#FFF69F", 
     Tufft = "#ec4339", Enteroendocrine = "#828585", Blood = "#9B9700"
   )
 }

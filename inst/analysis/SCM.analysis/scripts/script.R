@@ -1,7 +1,7 @@
 
 #PACKAGES
 packages <- c(
-  "CIMseq", "tidyverse", "future", "future.apply", "Seurat"
+  "CIMseq", "CIMseq.data", "tidyverse", "future", "future.apply", "Seurat"
 )
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
@@ -110,7 +110,7 @@ cObjMul <- CIMseqMultiplets(mul, mulERCC, select)
 if(!"data" %in% list.dirs(currPath, full.names = FALSE)) system('mkdir data')
 save(cObjSng, cObjMul, file = file.path(currPath, "data/CIMseqData.rda"))
 
-##spSwarm
+##Deconvolution
 baseSeed <- 43892
 init <- map(1:10, function(i) {
   cbind(
@@ -122,15 +122,12 @@ init <- map(1:10, function(i) {
 future::plan(multiprocess)
 print(paste0("Starting deconvolution at ", Sys.time()))
 sObj <- CIMseqSwarm(
-  cObjSng, cObjMul, maxiter = 2, swarmsize = ncol(init), 
-  nSyntheticMultiplets = 5, swarmInit = init, 
+  cObjSng, cObjMul, maxiter = 10, swarmsize = ncol(init), 
+  nSyntheticMultiplets = 400, swarmInit = init, 
   psoControl = list(eps.stagnate = 1, maxit.stagnate = 5)
 )
 print(paste0("Finished deconvolution at ", Sys.time()))
 
-if(!dir.exists('data')) dir.create('data')
 save(sObj, file = file.path(currPath, "data/sObj.rda"))
-
-if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))
 print("finished")

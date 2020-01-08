@@ -11,8 +11,8 @@ editor_options:
 ```{r setup, include=FALSE}
 #PACKAGES
 packages <- c(
-  "CIMseq.publication", "CIMseq", "printr", "ggthemes", "tidyr", "broom", "dplyr",
-  "tibble", "ggplot2", "readr"
+  "CIMseq.testing", "CIMseq.data", "CIMseq", "printr", "ggthemes", "tidyr", 
+  "broom", "dplyr", "tibble", "ggplot2", "readr"
 )
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)

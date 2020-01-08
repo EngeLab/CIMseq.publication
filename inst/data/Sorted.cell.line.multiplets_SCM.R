@@ -10,14 +10,14 @@ SCM <- function(save = TRUE) {
   shortName <- "SCM"
   cat(paste0('Processing ', projectName, '\n'))
 
-  m.link <- "https://drive.google.com/open?id=1XhVB0c9wi8BVKiDqhgp3sm4YNPnjD5im"
+  m.link <- 'https://drive.google.com/open?id=18e3TuxWeTe7tUWgYWysQR40Pf_amXGWw'
   Meta <- getMetadataViaLink(m.link)
   if("Missing" %in% colnames(Meta)) {
     Meta <- Meta %>%
       filter(is.na(Missing) | Missing == FALSE) %>%
       select(-Missing)
   }
-  c.link <- 'https://drive.google.com/open?id=1jrfycO_evRcBPsk0cs7wYgF5L_7QG-eI'
+  c.link <- 'https://drive.google.com/file/d/1fL0vCoPRTFyUR8146kuXLov6UvfWJErG/view?usp=sharing'
   countData <- getCountsDataViaLinks(c.link)
 
   #move genes to rownames

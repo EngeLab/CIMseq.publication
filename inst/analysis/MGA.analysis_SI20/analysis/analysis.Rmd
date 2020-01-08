@@ -13,7 +13,7 @@ editor_options:
 #add table of connections found per number of cells in multiplet
 
 ```{r, message = FALSE}
-packages <- c("CIMseq", "CIMseq.publication", "tidyverse", "circlize", "printr")
+packages <- c("CIMseq", "CIMseq.testing", "tidyverse", "circlize", "printr")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 
@@ -281,6 +281,7 @@ dev.off()
 
 Calculate probablity of paneth - other cell type interaction as the fraction of
 other cell types observed in multiplets reported to contain a paneth cell.
+
 ```{r, fig.align="center", fig.width=14, fig.height=12}
 pdata <- adjustFractions(cObjSng, cObjMul, sObj, theoretical.max = 4) %>%
   matrix_to_tibble("sample") %>%
@@ -317,6 +318,53 @@ ggsave(
   width = 240,
   units = "mm"
 )
+```
+
+Calculate the probability of observing Lgr5 expression in multiplets that 
+express Lyz1 based on CPM.
+
+```{r}
+#calculate cutoff for Lyz1 based on singlets
+cut <- getData(cObjSng, "counts.cpm") %>%
+  .['Lyz1', ] %>%
+  tibble(sample = names(.), Lyz1 = .) %>%
+  filter(getData(cObjSng, "classification") == "Paneth") %>%
+  pull(Lyz1) %>%
+  min()
+
+
+# p <- getData(cObjMul, "counts.cpm") %>%
+#   .[c("Lyz1", "Lgr5"), ] %>%
+#   t() %>%
+#   matrix_to_tibble("sample") %>%
+#   #filter(Lyz1 > cut) %>% #include only Lyz1 positive
+#   mutate(
+#     express.lgr5 = if_else(Lgr5 > 0, TRUE, FALSE),
+#     express.lyz1 = if_else(Lyz1 > cut, TRUE, FALSE)
+#   ) %>%
+#   count(express.lgr5, express.lyz1) %>%
+#   group_by(express.lyz1) %>%
+#   mutate(total = sum(n)) %>%
+#   mutate(lgr5.prob = n / total) %>%
+#   ungroup() %>%
+#   filter(express.lgr5) %>%
+#   ggplot() +
+#   geom_bar(aes(express.lyz1, lgr5.prob), stat = "identity", position = position_dodge(width = 1)) +
+#   labs(x = "Lyz1 expressed", y = "Lgr5 probability") +
+#   ggthemes::theme_few()
+
+
+getData(cObjMul, "counts.cpm") %>%
+  .[c("Lyz1", "Lgr5"), ] %>%
+  t() %>%
+  matrix_to_tibble("sample") %>%
+  filter(Lyz1 > cut) %>%
+  mutate(express.lgr5 = if_else(Lgr5 > 0, TRUE, FALSE)) %>%
+  count(express.lgr5) %>%
+  mutate(total = sum(n)) %>%
+  filter(express.lgr5) %>%
+  mutate(prob = n / total) %>%
+  pull(prob)
 ```
 
 ```{r}

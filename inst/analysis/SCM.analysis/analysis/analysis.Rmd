@@ -13,7 +13,7 @@ editor_options:
 ```{r, message = FALSE}
 #PACKAGES
 packages <- c(
-  "CIMseq", "CIMseq.publication", "printr", "ggthemes", "dplyr", 
+  "CIMseq", "CIMseq.testing", "CIMseq.data", "printr", "ggthemes", "dplyr", 
   "ggplot2", "tidyr", "purrr", "stringr", "readr"
 )
 purrr::walk(packages, library, character.only = TRUE)

@@ -1,5 +1,5 @@
 packages <- c(
-  "CIMseq", "printr", "ggthemes", "tibble", "future",
+  "CIMseq.data", "CIMseq", "printr", "ggthemes", "tibble", "future",
   "purrr", "dplyr", "tidyr"
 )
 purrr::walk(packages, library, character.only = TRUE)
@@ -26,7 +26,7 @@ ss <- getData(sObj, "fractions")
 colnames(ss) <- c("HOS", "HCT116", "A375")
 sObj@fractions <- ss
 
-if(!dir.exists('data')) dir.create('data')
+if(!"data" %in% list.dirs(currPath, full.names = FALSE)) system('mkdir data')
 save(cObjSng, cObjMul, sObj, file = file.path(currPath, 'data/algoOutput.rda'))
 
 renameClasses <- function(class) {
@@ -39,6 +39,5 @@ report <- unnest(getData(sObj, "stats"))
 colnames(report)[6:8] <- renameClasses(colnames(report)[6:8])
 
 save(report, file = file.path(currPath, "data/report.rda"))
-if(!dir.exists('logs')) dir.create('logs')
 writeLines(capture.output(sessionInfo()), file.path(currPath, "logs/sessionInfo.txt"))
 

@@ -34,16 +34,19 @@ if(!is.na(args[1])) {
   
 } else {
   library(CIMseq)
-  library(CIMseq.publication)
+  library(CIMseq.data)
+  library(CIMseq.testing)
   
   #gives 1370 swarm members
   baseSeed <- 43892
-  init <- swarmInit(cObjSng, 2, null.weight = 0.5, seed = baseSeed)
-  
+  init <- cbind(
+      swarmInit(cObjSng, 2, null.weight = 0.5, seed = baseSeed),
+      swarmInit(cObjSng, 3, null.weight = 0.5, seed = baseSeed)
+  )
   options(future.globals.maxSize = Inf)
   runSwarmMultiprocess(
-    cObjSng, cObjMul, swarmInit = init, maxiter = 2, swarmsize = ncol(init),
-    nSyntheticMultiplets = 5, eps.stagnate = 1, maxit.stagnate = 5,
+    cObjSng, cObjMul, swarmInit = init, maxiter = 100, swarmsize = ncol(init),
+    nSyntheticMultiplets = 2000, eps.stagnate = 1, maxit.stagnate = 5,
     currPath = getwd()
   )
 }

@@ -11,7 +11,7 @@ editor_options:
 ---
 
 ```{r, message = FALSE}
-packages <- c("CIMseq", "CIMseq.publication", "tidyverse", "ggthemes")
+packages <- c("CIMseq", "CIMseq.testing", "CIMseq.data", "tidyverse", "ggthemes")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 
@@ -45,6 +45,7 @@ p <- plotUnsupervisedMarkers(
   c("Lgr5", "Ptprc", "Chga", "Dclk1", "Alpi", "Slc26a3", "Atoh1", "Lyz1"),
   pal = RColorBrewer::brewer.pal(8, "Set1")
 )
+p
 ggsave(
   plot = p,
   filename = '../figures/MGA.enge.markers.pdf',
@@ -55,6 +56,7 @@ ggsave(
 )
 
 p <- plotUnsupervisedMarkers(cObjSng, cObjMul, "Mki67")
+p
 ggsave(
   plot = p,
   filename = '../figures/MGA.enge.Mki67.pdf',
@@ -64,10 +66,34 @@ ggsave(
   units = "mm"
 )
 
-p <- plotUnsupervisedMarkers(cObjSng, cObjMul, "Hoxb13")
+# p <- plotUnsupervisedMarkers(cObjSng, cObjMul, "Hoxb13")
+# ggsave(
+#   plot = p,
+#   filename = '../figures/MGA.enge.Hoxb13.pdf',
+#   device = cairo_pdf,
+#   height = 180,
+#   width = 180,
+#   units = "mm"
+# )
+```
+
+Mouse age
+```{r, fig.align="center", fig.width=12, fig.height=10}
+p <- getData(cObjSng, "dim.red") %>%
+  matrix_to_tibble("sample") %>%
+  inner_join(MGA.Meta, by = "sample") %>%
+  mutate(subject_age = as.character(subject_age)) %>%
+  mutate(subject_age = parse_factor(subject_age, levels = sort(unique(subject_age)))) %>%
+  ggplot() +
+  geom_point(aes(V1, V2, colour = subject_age), alpha = 0.7) +
+  ggthemes::theme_few() +
+  labs(x = "UMAP dim. 1", y = "UMAP dim. 2") +
+  scale_colour_manual(values = rev(col40())) +
+  guides(colour = guide_legend(title = "Age (days)"))
+p
 ggsave(
   plot = p,
-  filename = '../figures/MGA.enge.Hoxb13.pdf',
+  filename = '../figures/MGA.enge.QC.age.pdf',
   device = cairo_pdf,
   height = 180,
   width = 180,
@@ -75,19 +101,81 @@ ggsave(
 )
 ```
 
-```{r, eval = FALSE}
-classHeatmap(
-  data = data.frame(
-    gene = markers$gene,
-    class = markers$cluster
-  ),
-  counts.log = getData(cObjSng, "counts.log"),
-  classes = tibble(
-    sample = colnames(getData(cObjSng, "counts")), 
-    class = getData(cObjSng, "classification")
-  )
+Mouse sex
+```{r, fig.align="center", fig.width=12, fig.height=10}
+p <- getData(cObjSng, "dim.red") %>%
+  matrix_to_tibble("sample") %>%
+  inner_join(MGA.Meta, by = "sample") %>%
+  mutate(subject_sex = as.character(subject_sex)) %>%
+  mutate(subject_sex = parse_factor(subject_sex, levels = sort(unique(subject_sex)))) %>%
+  ggplot() +
+  geom_point(aes(V1, V2, colour = subject_sex), alpha = 0.7) +
+  ggthemes::theme_few() +
+  labs(x = "UMAP dim. 1", y = "UMAP dim. 2") +
+  scale_colour_manual(values = rev(col40())) +
+  guides(colour = guide_legend(title = "Sex"))
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge.QC.sex.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
 )
 ```
+
+Total counts
+```{r, fig.align="center", fig.width=12, fig.height=10}
+cs <- colSums(getData(cObjSng, "counts"))
+
+p <- getData(cObjSng, "dim.red") %>%
+  matrix_to_tibble("sample") %>%
+  inner_join(tibble(sample = names(cs), counts = cs)) %>%
+  ggplot() +
+  geom_point(aes(V1, V2, colour = counts), alpha = 0.7) +
+  ggthemes::theme_few() +
+  labs(x = "UMAP dim. 1", y = "UMAP dim. 2") +
+  scale_colour_viridis_c() +
+  guides(colour = guide_colourbar(title = "Total counts"))
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge.QC.counts.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+```
+
+Total genes
+```{r}
+tg <- apply(getData(cObjSng, "counts"), 2, function(c) length(which(c != 0)))
+
+p <- getData(cObjSng, "dim.red") %>%
+  matrix_to_tibble("sample") %>%
+  inner_join(tibble(sample = names(tg), genes = tg)) %>%
+  ggplot() +
+  geom_point(aes(V1, V2, colour = genes), alpha = 0.7) +
+  ggthemes::theme_few() +
+  labs(x = "UMAP dim. 1", y = "UMAP dim. 2") +
+  scale_colour_viridis_c() +
+  guides(colour = guide_colourbar(title = "Total genes"))
+
+p
+ggsave(
+  plot = p,
+  filename = '../figures/MGA.enge.QC.genes.pdf',
+  device = cairo_pdf,
+  height = 180,
+  width = 180,
+  units = "mm"
+)
+```
+
 
 Cell type markers
 ```{r, fig.align="center", fig.width=12, fig.height=10}
@@ -110,7 +198,7 @@ d <- getData(cObjSng, "counts.cpm")[markers, ] %>%
   inner_join(tibble(
     Sample = colnames(getData(cObjSng, "counts")), 
     Classification = getData(cObjSng, "classification")
-  )) %>%
+  ), by = "Sample") %>%
   mutate(Classification = parse_factor(Classification, levels = classOrder.MGA('total'))) %>%
   mutate(gene = parse_factor(gene, levels = gene.order)) %>%
   arrange(Classification, gene) %>%
@@ -181,15 +269,25 @@ ggsave(
 ```
 
 Stemness dotplot
+
 ```{r, fig.align="center", fig.width=10, fig.height=8}
-load('../data/seurat.rda')
-markers <- c("Wnt3", "Wnt2b", "Wnt4", "Wnt5a", "Lgr5", "Axin2", "Ascl2")
+markers <- c(
+  "Wnt3", "Wnt2b", "Wnt4", "Wnt5a", "Lgr5", "Axin2", "Ascl2", "Egf", "Notum", 
+  "Kit", "Dll1", "Dll4", "Reg4", "Plet1"
+)
 gene.order <- markers
 
 #scale.func <- scale_size
 scale.func <- scale_radius
 scale.min <- NA
 scale.max <- NA
+cOrderAlt <- c(
+  "SI Goblet", "SI Paneth", "SI Stem", "SI Transit amplifying", 
+  "SI Progenitor early", "SI Progenitor late", "SI Enterocytes", 
+  "C Goblet proliferating", "C Goblet Plet1 1", "C Goblet Plet1 2", "C Stem 1",
+  "C Stem 2", "C Stem 3", "C Transit amplifying", "C Progenitor", 
+  "C Colonocytes", "C Goblet Plet1 neg.", "Enteroendocrine", "Tufft", "Blood"
+)
 
 p <- getData(cObjSng, "counts.cpm")[markers, ] %>%
   t() %>%
@@ -213,18 +311,31 @@ p <- getData(cObjSng, "counts.cpm")[markers, ] %>%
   mutate(type = case_when(
     str_detect(gene, "^Wnt") ~ "Wnt ligand",
     gene %in% c("Lgr5", "Axin2", "Ascl2") ~ "Wnt target",
-    TRUE ~ "error"
+    gene %in% c("Egf", "Notum", "Dll1", "Dll4") ~ "Other stemness factors",
+    gene %in% c("Plet1", "Reg4", "Kit") ~ "Stem-adjacent\nsecretory cell factors",
+    TRUE ~ "NA"
   )) %>%
-  mutate(Classification = parse_factor(Classification, levels = classOrder.MGA('total'))) %>%
+  mutate(tissue = case_when(
+    str_detect(Classification, "^SI") ~ "Small intestine",
+    str_detect(Classification, "^C") ~ "Colon",
+    TRUE ~ "Other"
+  )) %>%
+  mutate(tissue = parse_factor(tissue, levels = c("Small intestine", "Colon", "Other"))) %>%
+  mutate(Classification = parse_factor(Classification, levels = cOrderAlt)) %>%
   mutate(gene = parse_factor(gene, levels = rev(gene.order))) %>%
-  mutate(type = parse_factor(type, levels = c("Wnt ligand", "Receptor", "Wnt target"))) %>%
+  mutate(type = parse_factor(
+    type, 
+    levels = c(
+      "Wnt ligand", "Wnt target", "Other stemness factors", 
+      "Stem-adjacent\nsecretory cell factors"
+  ))) %>%
   ggplot() +
   geom_point(
     aes(Classification, gene, size = pct, colour = scaled.mean.exp)
   ) +
-  facet_grid(type ~ ., space = "free", scales = "free") +
+  facet_grid(type ~ tissue, space = "free", scales = "free") +
   scale_color_gradient(low = "white", high = "darkred") +
-  scale.func(range = c(0, 18), limits = c(scale.min, scale.max)) +
+  scale.func(range = c(0, 12), limits = c(scale.min, scale.max)) +
   guides(
     size = guide_legend(
       title = "% expressed", title.position = "top", title.hjust = 0.5
@@ -241,12 +352,13 @@ p <- getData(cObjSng, "counts.cpm")[markers, ] %>%
     legend.position = "top",
     legend.justification = "center"
   )
+
 p
 ggsave(
   plot = p,
   filename = '../figures/MGA.enge.stemness.dotplot.pdf',
   device = cairo_pdf,
-  height = 160,
+  height = 250,
   width = 250,
   units = "mm"
 )
@@ -320,6 +432,11 @@ plotSwarmCircos(
 )
 invisible(dev.off())
 ```
+
+```{r}
+sessionInfo()
+```
+
 
 
 

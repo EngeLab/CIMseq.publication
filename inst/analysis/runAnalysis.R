@@ -1,49 +1,74 @@
+#ARGUMENTS INPUT
+args = commandArgs(trailingOnly = TRUE)
+print(paste("Running ", args, " analysis.", sep = ""))
+
+#PACKAGES
 library(purrr)
 library(CIMseq.publication)
 
 #ARGUMENTS
-directories <- c(
-  "MGA.analysis_enge20",
-  "SCM.analysis", 
-  "deconvoluteSingletsMouse", 
-  "MGA.analysis_colon20", 
-  "MGA.analysis_SI20", 
-  "multipletCellNrDist", 
-  "visualizingPoissonAlgo", 
-  "visualizingSolutionSpace"
-)
+if(length(args) > 0) {
+  directories <- args
+} else {
+  directories <- c(
+    "MGA.analysis_enge20",
+    "SCM.analysis", 
+    "deconvoluteSingletsMouse", 
+    "MGA.analysis_colon20", 
+    "MGA.analysis_SI20", 
+    "multipletCellNrDist", 
+    "visualizingPoissonAlgo", 
+    "visualizingSolutionSpace"
+  )
+}
+
 directories <- file.path('./inst/analysis', directories)
 
-
-allFigures <- list(
-  "Figure 1" = c(
-    b = 'inst/analysis/SCM.analysis/figures/SCM.ercc.pdf', 
-    c = 'inst/analysis/SCM.analysis/figures/SCM.estimatedVSactual.pdf',
-    d = 'inst/analysis/multipletCellNrDist/figures/multipletCellNrDist.pdf',
-    e = 'inst/analysis/SCM.analysis/figures/figure2.pdf'
-  ), 
-  "Figure 2" = c(
-    a1 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.markers.pdf',
-    a2 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.classes.pdf',
-    a3 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.cellcycle.pdf',
-    b = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.sngMulRelFreq.pdf',
-    c = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.circos.pdf'
-  ), 
-  "Figure 3" = c(
-    a1 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.markers.pdf',
-    a2 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.classes.pdf',
-    a3 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.Mki67.pdf',
-    b = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.sngMulRelFreq.pdf',
-    c = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.circos.pdf'
-  ), 
-  "Figure 4" = c(
-    a = 'inst/analysis/MGA.analysis_enge20/figures/MGA.enge.stemness.dotplot.pdf'
-  )
+expectedData <- list(
+  "MGA.analysis_enge20" = c("CIMseqData.rda", "seurat.rda", "sObj.rda"),
+  "SCM.analysis" = c("CIMseqData.rda", "sObj.rda"),
+  "deconvoluteSingletsMouse" = c("sObj.rda"),
+  "MGA.analysis_colon20" = c("CIMseqData.rda", "seurat.rda", "sObj.rda", "seuratDE.rda"),
+  "MGA.analysis_SI20" = c("CIMseqData.rda", "seurat.rda", "sObj.rda"),
+  "multipletCellNrDist" = c("Multiplets_cellNumberFreq.txt"),
+  "visualizingPoissonAlgo" = c("syntheticMultiplets.rda"),
+  "visualizingSolutionSpace" =c("report.rda", "algoOutput.rda")
 )
+
+# allFigures <- list(
+#   "Figure 1" = c(
+#     b = 'inst/analysis/SCM.analysis/figures/SCM.ercc.pdf', 
+#     c = 'inst/analysis/SCM.analysis/figures/SCM.estimatedVSactual.pdf',
+#     d = 'inst/analysis/multipletCellNrDist/figures/multipletCellNrDist.pdf',
+#     e = 'inst/analysis/SCM.analysis/figures/figure2.pdf'
+#   ), 
+#   "Figure 2" = c(
+#     a1 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.markers.pdf',
+#     a2 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.classes.pdf',
+#     a3 = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.cellcycle.pdf',
+#     b = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.sngMulRelFreq.pdf',
+#     c = 'inst/analysis/MGA.analysis_SI20/figures/MGA.enge20SI.circos.pdf'
+#   ), 
+#   "Figure 3" = c(
+#     a1 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.markers.pdf',
+#     a2 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.classes.pdf',
+#     a3 = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.Mki67.pdf',
+#     b = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.sngMulRelFreq.pdf',
+#     c = 'inst/analysis/MGA.analysis_colon20/figures/MGA.enge20.circos.pdf'
+#   ), 
+#   "Figure 4" = c(
+#     a = 'inst/analysis/MGA.analysis_enge20/figures/MGA.enge.stemness.dotplot.pdf'
+#   )
+# )
 
 #FUNCTIONS
 #generate data
-generateData <- function(directory) {
+generateData <- function(directory, expectedData = NULL) {
+  if(!is.null(expectedData)) {
+    paths <- file.path('./inst/analysis', basename(directory), 'data', expectedData[[basename(directory)]])
+    data.exists <- all(file.exists(paths))
+    if(data.exists) return(NA)
+  }
   home <- getwd()
   print(paste0("Processing ", basename(directory)))
   setwd(directory)
@@ -93,10 +118,18 @@ generateFigures <- function(figureSpecs, out, name) {
 }
 
 #RUN
-one <- map(directories, ~generateData(.x))
+#should check for data first
+#which data is expected? 
+#Note that MGA.analysis_enge20 must run before: deconvoluteSingletsMouse,
+# MGA.analysis_colon20, MGA.analysis_SI20
+
+one <- map(directories, ~generateData(.x, expectedData)) 
 two <- map(directories, ~runAnalysis(.x))
-three <- map(1:length(allFigures), ~generateFigures(
-  file.path(getwd(), allFigures[[.x]]),
-  'inst/figures',
-  names(allFigures)[.x])
-)
+
+#Compiling figures automatically, using code below, makes it more difficult to
+#re-run individual analysis
+# three <- map(1:length(allFigures), ~generateFigures(
+#   file.path(getwd(), allFigures[[.x]]),
+#   'inst/figures',
+#   names(allFigures)[.x])
+# )

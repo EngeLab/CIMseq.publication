@@ -10,7 +10,7 @@ MGA <- function(save = TRUE) {
   shortName <- "MGA"
   cat(paste0('Processing ', projectName, '\n'))
   
-  m.link <- "https://drive.google.com/open?id=1fl1ZyR5jUJ22dKxfw6Upd5jNmnZqoe5d"
+  m.link <- 'https://drive.google.com/open?id=18eCfbpbt5lagGz3gnz3Rs_T-BXe-Gwsu'
   Meta <- getMetadataViaLink(m.link)
   if("Missing" %in% colnames(Meta)) {
     Meta <- Meta %>%
@@ -18,22 +18,28 @@ MGA <- function(save = TRUE) {
       select(-Missing)
   }
   
-  c.link <- c(
-    'https://drive.google.com/file/d/1sjFdG8JPR-pvk0IbdJYpCQHB0b8c9jwU/view?usp=sharing',
-    'https://drive.google.com/file/d/1om-fGtkJhrSC4n69WgBi2JD8kRrGDXyi/view?usp=sharing',
-    'https://drive.google.com/file/d/11rmtUZ9Gyq9jec9fgO3xtkKBZ7LccDmc/view?usp=sharing',
-    'https://drive.google.com/file/d/1LldRqRGfRKN8uTDqd0Hk12elTANJS6Kg/view?usp=sharing',
-    'https://drive.google.com/file/d/1bSGsxNdajABpUg_wDUHL6eNLJjwpP9Us/view?usp=sharing',
-    'https://drive.google.com/file/d/131WFJmLFMZlnnPQjMPijyMuXulo2ZWoN/view?usp=sharing',
-    'https://drive.google.com/file/d/1R8d1AEkOnHR4GCsbDlvNF10u1qqHA0tz/view?usp=sharing',
-    'https://drive.google.com/file/d/1J6VHAGQVZOFT6pzD6oMtzloqTKQl94jl/view?usp=sharing',
-    'https://drive.google.com/file/d/1SQnbGLcee3E4m7uT-yqVzk0DrJtV2zz_/view?usp=sharing',
-    'https://drive.google.com/file/d/1G-X3xuGsvWGm5lA0HskFN8rNdvkjj_Jp/view?usp=sharing',
-    'https://drive.google.com/file/d/1Tzrw7kHaLLfaPzjoQyWf5sZT97LVsVKP/view?usp=sharing',
-    'https://drive.google.com/file/d/1HIE-vTB1NInrACfbIKJe8iMX6LHyfmxm/view?usp=sharing',
-    'https://drive.google.com/file/d/1VFZFJLtSQjXlzCp-JsrG6S3t28vDxFHf/view?usp=sharing',
-    'https://drive.google.com/file/d/1evrm5lGjfOoNY6mb63Igmp5pljzyJPv-/view?usp=sharing'
+  prefix <- 'https://drive.google.com/file/d/'
+  suffix <- '/view?usp=sharing'
+  
+  short.id <- c(
+    '1y0CgZbSAK4TnVtozBPgVIpgTBeQZoEn3',
+    '1FFedVrk1ajeV4U4AI2Da37gH2pzfnNWi',
+    '1ztgojZRaMqb54tlLTiXyAMNy8Cso42On',
+    '1t6rycfkZRHEX1ZGnQ_stwawWDZu9Y-HZ',
+    '1P8nnel-jT8_6Qgrpg59Htmfo19-UDYXD',
+    '1g8qi6MRMygspluBNDdcEIqUnkcHoh3oJ',
+    '1d_EPDSIf5V7qsAvmFZOuWkjzxp0V4xiQ',
+    '1f4T1z6B5-Yph2QK1o2bWkeFh4e0h3JjX',
+    '12IdD7Z5WQ0qMxFBOUsO-CiftZj09kYOR',
+    '1rNyi3KAuTrQf5kgaKVyWLSRd7fLyTxbH',
+    '1k-wol_MoHp7kObRrhyVVJTvHClP6P84f',
+    '1vsaSqzR_whbJffSgsVm5YuHKfiBHL_Ke',
+    '1OVoKJGVZDMXRAX82vF-JPjBfIcQM3RpK',
+    '1tktL-51WY30eHw6Fa17fpEo1SHjxGwWI'
   )
+  
+  c.link <- paste(prefix, short.id, suffix, sep = "")
+  
   countData <- getCountsDataViaLinks(c.link)
   colnames(countData) <- renameMgfpSamples(colnames(countData))
 

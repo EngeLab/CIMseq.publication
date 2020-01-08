@@ -12,7 +12,7 @@ editor_options:
 
 ```{r, message = FALSE}
 #PACKAGES
-packages <- c("CIMseq", "CIMseq.publication", "tidyverse")
+packages <- c("CIMseq", "CIMseq.testing", "tidyverse")
 purrr::walk(packages, library, character.only = TRUE)
 rm(packages)
 
@@ -52,22 +52,47 @@ fraction of times is a sample of that class devonvoluted correctly.
 ```{r}
 data %>%
   mutate(correct = cells == class) %>%
-  group_by(class) %>%
+  mutate(tissue = case_when(
+    str_detect(class, "^C") ~ "colon",
+    str_detect(class, "SI") ~ "SI", 
+    TRUE ~ "other"
+  )) %>%
+  mutate(tissue = parse_factor(tissue, levels = c("SI", "colon", "other"))) %>%
+  group_by(class, tissue) %>%
   summarize(precision = sum(correct) / n()) %>%
-  arrange(precision) %>%
+  arrange(tissue, precision) %>%
+  select(class, precision) %>%
   print(n = nrow(.))
 ```
 
 ```{r, echo = FALSE}
 pdf('../figures/table.pdf')
+
 data %>%
   mutate(correct = cells == class) %>%
-  group_by(class) %>%
+  mutate(tissue = case_when(
+    str_detect(class, "^C") ~ "colon",
+    str_detect(class, "SI") ~ "SI", 
+    TRUE ~ "other"
+  )) %>%
+  mutate(tissue = parse_factor(tissue, levels = c("SI", "colon", "other"))) %>%
+  group_by(class, tissue) %>%
   summarize(precision = sum(correct) / n()) %>%
-  arrange(precision) %>%
-  mutate(precision = round(precision, digits = 3)) %>%
+  arrange(tissue, precision) %>%
+  select(class, precision) %>%
   rename(Class = class, Precision = precision) %>%
+  mutate(Precision = round(Precision, digits = 3)) %>%
+  t() %>% as.data.frame() %>%
   gridExtra::grid.table(., rows = rep("", nrow(.)))
+
+# data %>%
+#   mutate(correct = cells == class) %>%
+#   group_by(class) %>%
+#   summarize(precision = sum(correct) / n()) %>%
+#   arrange(precision) %>%
+#   mutate(precision = round(precision, digits = 3)) %>%
+#   rename(Class = class, Precision = precision) %>%
+#   gridExtra::grid.table(., rows = rep("", nrow(.)))
 invisible(dev.off())
 ```
 
@@ -119,6 +144,8 @@ plotSwarmCircos(
   classOrder = classOrder.MGA('total'), theoretical.max = 4
 )
 ```
+
+<br></br>
 
 Table of detected cell numbers per singlet 
 (perfect: all == 1, acceptable: all == 0 | all == 1)
