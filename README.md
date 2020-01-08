@@ -7,7 +7,7 @@ Facilitates reproduction of figures associated with the CIM-seq publication.
 
 ### Prerequisites
 
-Install R, git, and docker first if not installed
+Install R, git, and docker first if not installed.
 
 ### Instructions
 
@@ -15,7 +15,7 @@ Install R, git, and docker first if not installed
     `git clone https://github.com/EngeLab/CIMseq.publication.git`
 
 2.  change to the repo directory
-    \`cd CIMseq.publication
+    `cd CIMseq.publication`
 
 3.  get the docker image
     `docker pull engelab/cim-seq-publication`
