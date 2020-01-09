@@ -25,4 +25,4 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Suggests: testthat
-Remotes: jasonserviss/CIMseq@devel
+Remotes: EngeLab/CIMseq@devel
