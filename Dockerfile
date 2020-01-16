@@ -56,19 +56,16 @@ RUN Rscript -e "remotes::install_github('thomasp85/patchwork@fd7958bae3e7a1e3023
 RUN Rscript -e "BiocManager::install('S4Vectors', update = FALSE)"
 
 # Clone and install CIMseq
-RUN git clone https://github.com/jasonserviss/CIMseq.git --branch devel ~/Github/CIMseq
-RUN Rscript -e "devtools::install('~/Github/CIMseq', dependencies = FALSE)"
+RUN mkdir /home/Github
+RUN git clone https://github.com/EngeLab/CIMseq.git --branch devel /home/Github/CIMseq
+RUN Rscript -e "devtools::install('/home/Github/CIMseq', dependencies = FALSE)"
 
 # Clone and install CIMseq.publication (needed for data processing functions)
-RUN touch tmp8.txt
-RUN git clone https://github.com/EngeLab/CIMseq.publication.git ~/Github/CIMseq.publication
-RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
+RUN git clone https://github.com/EngeLab/CIMseq.publication.git /home/Github/CIMseq.publication
+RUN Rscript -e "devtools::install('/home/Github/CIMseq.publication', dependencies = FALSE)"
 
-# Run data script
-RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/data/data.R'); processRaw()"
+# Run data scripts
+WORKDIR /home/Github/CIMseq.publication
 
-# Re-install CIMseq.publication (needed for access to processed data)
-RUN Rscript -e "devtools::install('~/Github/CIMseq.publication', dependencies = FALSE)"
-
-# Run analysis data scripts, analyses, and generate figures
-#RUN Rscript -e "setwd('~/Github/CIMseq.publication'); source('./inst/analysis/runAnalysis.R')"
+#docker run -v $PWD:/home/Github/CIMseq.publication cim-seq-publication Rscript -e "source('./inst/data/data.R')"
+#docker run -v $PWD:/home/Github/CIMseq.publication cim-seq-publication Rscript -e "source('./inst/data/data.R'); source('./inst/analysis/runAnalysis.R')"

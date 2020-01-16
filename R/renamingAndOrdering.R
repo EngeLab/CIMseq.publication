@@ -32,7 +32,7 @@ renameClasses.MGA <- function(class, abrev = TRUE) {
       class == "12" ~ "SI Progenitor early",
       class == "13" ~ "C Stem 2",
       class == "14" ~ "Enteroendocrine",
-      class == "15" ~ "Tufft",
+      class == "15" ~ "Tuft",
       class == "16" ~ "SI Enterocytes",
       class == "17" ~ "SI Paneth",
       class == "18" ~ "C Goblet proliferating",
@@ -56,7 +56,7 @@ renameClasses.MGA <- function(class, abrev = TRUE) {
       class == "12" ~ "Progenitor early",
       class == "13" ~ "Stem 2",
       class == "14" ~ "Enteroendocrine",
-      class == "15" ~ "Tufft",
+      class == "15" ~ "Tuft",
       class == "16" ~ "Enterocytes",
       class == "17" ~ "Paneth",
       class == "18" ~ "Goblet proliferating",
@@ -96,7 +96,7 @@ classOrder.MGA <- function(type) {
     "SI Progenitor late", "SI Enterocytes", "SI Goblet", 
     "C Goblet proliferating", "C Goblet Plet1 1", "C Goblet Plet1 2", "C Stem 1",
     "C Stem 2", "C Stem 3", "C Transit amplifying", "C Progenitor", 
-    "C Colonocytes", "C Goblet Plet1 neg.", "Enteroendocrine", "Tufft", "Blood"
+    "C Colonocytes", "C Goblet Plet1 neg.", "Enteroendocrine", "Tuft", "Blood"
   )
 }
 
@@ -104,7 +104,7 @@ classOrder.MGA <- function(type) {
   c(
     "Paneth", "Stem", "Transit amplifying", "Progenitor early", 
     "Progenitor late", "Enterocytes", "Goblet", "Enteroendocrine", 
-    "Tufft", "Blood"
+    "Tuft", "Blood"
   )
 }
 
@@ -113,7 +113,7 @@ classOrder.MGA <- function(type) {
     "Goblet proliferating", "Goblet Plet1 1", "Goblet Plet1 2", 
     "Stem 1", "Stem 2", "Stem 3", "Transit amplifying", 
     "Progenitor", "Colonocytes", "Goblet Plet1 neg.",  "Enteroendocrine", 
-    "Tufft", "Blood"
+    "Tuft", "Blood"
   )
 }
 

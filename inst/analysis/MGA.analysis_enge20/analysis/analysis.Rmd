@@ -286,7 +286,7 @@ cOrderAlt <- c(
   "SI Progenitor early", "SI Progenitor late", "SI Enterocytes", 
   "C Goblet proliferating", "C Goblet Plet1 1", "C Goblet Plet1 2", "C Stem 1",
   "C Stem 2", "C Stem 3", "C Transit amplifying", "C Progenitor", 
-  "C Colonocytes", "C Goblet Plet1 neg.", "Enteroendocrine", "Tufft", "Blood"
+  "C Colonocytes", "C Goblet Plet1 neg.", "Enteroendocrine", "Tuft", "Blood"
 )
 
 p <- getData(cObjSng, "counts.cpm")[markers, ] %>%
