@@ -1,6 +1,8 @@
 CIM-seq publication
 ================
 
+Release build: <a href="https://travis-ci.com/EngeLab/CIMseq"><img src="https://travis-ci.com/EngeLab/CIMseq.publication.svg?branch=master"></a>
+
 ### Introduction
 
 Facilitates reproduction of figures associated with the CIM-seq publication.
