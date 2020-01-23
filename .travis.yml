@@ -6,8 +6,7 @@ env:
     - _R_CHECK_FORCE_SUGGESTS=0
 language: r
 r: 
-  - release
-  - devel
+  - 3.5.2
 r_packages:
   - devtools
 package: cache

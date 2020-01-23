@@ -21,6 +21,7 @@ NULL
 #' @export
 #' @import CIMseq
 #' @import future.apply
+#' @import future
 
 runSwarmMultiprocess <- function(
   singlets, multiplets, 
@@ -45,42 +46,44 @@ runSwarmMultiprocess <- function(
   save(sObj, file = file.path(currPath, "data/sObj.rda"))
 }
 
-.runSwarmBatch <- function(
-  singlets, multiplets, 
-  swarmInit = NULL, 
-  maxiter = 100,
-  nSyntheticMultiplets = 400,
-  eps.stagnate = 1,
-  maxit.stagnate = 5,
-  currPath = getwd(),
-  time = "24:00:00",
-  ...
-){
-  #requires future.batchtools package
-  if(is.null(swarmInit)) swarmInit <- swarmInit(singlets, 2)
-  options(future.wait.interval = 10000.0)
-  options(future.wait.timeout = 1e9)
-  plan(
-    batchtools_slurm,
-    template = "/crex/proj/snic2018-8-151/private/batchtools.slurm.tmpl",
-    resources = list(
-      account = "snic2018-8-151", partition = "core", ntasks = 1L,
-      time = time, jobname = "CIMseq",
-      modules = "R_packages/3.5.0", R = "R/3.5.0", 
-      log.file = file.path(currPath, "logs/slurm.txt")
-    ),
-    workers = 100
-  )
-  
-  #run deconvolution
-  print(paste0("Starting deconvolution at ", Sys.time()))
-  sObj <- CIMseqSwarm(
-    cObjSng, cObjMul, maxiter = 100, swarmsize = 500, nSyntheticMultiplets = 400
-  )
-  print(paste0("Finished deconvolution at ", Sys.time()))
-  if(!dir.exists('data')) dir.create('data')
-  save(sObj, file = file.path(currPath, "data/sObj.rda"))
-}
+# .runSwarmBatch <- function(
+#   singlets, multiplets, 
+#   swarmInit = NULL, 
+#   maxiter = 100,
+#   nSyntheticMultiplets = 400,
+#   eps.stagnate = 1,
+#   maxit.stagnate = 5,
+#   currPath = getwd(),
+#   time = "24:00:00",
+#   ...
+# ){
+#   
+#   #requires future.batchtools package
+#   if(is.null(swarmInit)) swarmInit <- swarmInit(singlets, 2)
+#   options(future.wait.interval = 10000.0)
+#   options(future.wait.timeout = 1e9)
+#   plan(
+#     future.batchtools::batchtools_slurm,
+#     template = "/crex/proj/snic2018-8-151/private/batchtools.slurm.tmpl",
+#     resources = list(
+#       account = "snic2018-8-151", partition = "core", ntasks = 1L,
+#       time = time, jobname = "CIMseq",
+#       modules = "R_packages/3.5.0", R = "R/3.5.0", 
+#       log.file = file.path(currPath, "logs/slurm.txt")
+#     ),
+#     workers = 100
+#   )
+#   
+#   #run deconvolution
+#   print(paste0("Starting deconvolution at ", Sys.time()))
+#   sObj <- CIMseqSwarm(
+#     singlets, multiplets, maxiter = 100, swarmsize = 500, 
+#     nSyntheticMultiplets = 400
+#   )
+#   print(paste0("Finished deconvolution at ", Sys.time()))
+#   if(!dir.exists('data')) dir.create('data')
+#   save(sObj, file = file.path(currPath, "data/sObj.rda"))
+# }
 
 #' runSwarmUppmax
 #'
@@ -107,6 +110,7 @@ NULL
 #' @export
 #' @import CIMseq
 #' @import future.apply
+#' @import future
 
 runSwarmUppmax <- function(
   singlets, multiplets, 

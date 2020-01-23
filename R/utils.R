@@ -24,25 +24,25 @@ seuratToCIMseq <- function(
   seurat.obj, singlets, singlet.ercc, multiplets, multiplet.ercc, markers
 ){
   #singlet data
-  singlets <- singlets[, colnames(singlets) %in% colnames(mca@data)]
+  singlets <- singlets[, colnames(singlets) %in% colnames(seurat.obj@data)]
   singletERCC <- singletERCC[, colnames(singletERCC) %in% colnames(singlets)]
-  idx <- match(names(mca@ident), colnames(singlets))
+  idx <- match(names(seurat.obj@ident), colnames(singlets))
   
   #classifications
-  classes <- as.character(mca@ident)[idx]
-  names(classes) <- names(mca@ident)[idx]
+  classes <- as.character(seurat.obj@ident)[idx]
+  names(classes) <- names(seurat.obj@ident)[idx]
   
   #features
   var.genes <- unique(markers$gene)
   select <- which(rownames(singlets) %in% var.genes)
   
   #dim red
-  dim.red <- mca@dr$umap@cell.embeddings
+  dim.red <- seurat.obj@dr$umap@cell.embeddings
   colnames(dim.red) <- NULL
   
   #CIMseq objs
   cObjSng <- CIMseqSinglets(singlets, singletERCC, dim.red, classes)
-  cObjMul <- CIMseqMultiplets(multiplets, multipletERCC, select)
+  cObjMul <- CIMseqMultiplets(multiplets, multiplet.ercc, select)
   
   return(list(cObjSng, cObjMul))
 }

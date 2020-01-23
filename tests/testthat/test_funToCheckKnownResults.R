@@ -12,7 +12,7 @@ test_that("check that .tp outputs the expected result", {
     to = c("B", "C", "B", "C", "D", "C", "D")
   ) %>%
   tidyr::unite(connections, from, to, sep = "-") %>%
-  tidyr::nest(-multiplet)
+  tidyr::nest(data = c(connections))
   
   known <- tibble::tibble(
     multiplet = sort(c(LETTERS[1], rep(LETTERS[2], 6))),
@@ -20,7 +20,7 @@ test_that("check that .tp outputs the expected result", {
     to = c("B", "B", "C", "D", "C", "D", "D")
   ) %>%
   tidyr::unite(connections, from, to, sep = "-") %>%
-  tidyr::nest(-multiplet)
+    tidyr::nest(data = c(connections))
   
   data <- dplyr::full_join(detected, known, by = "multiplet")
   
@@ -45,7 +45,7 @@ test_that("check that .fp outputs the expected result", {
     to = c("B", "C", "B", "C", "D", "C", "D")
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
-    tidyr::nest(-multiplet)
+    tidyr::nest(data = c(connections))
   
   known <- tibble::tibble(
     multiplet = sort(c(LETTERS[1], rep(LETTERS[2], 6))),
@@ -53,7 +53,7 @@ test_that("check that .fp outputs the expected result", {
     to = c("B", "B", "C", "D", "C", "D", "D")
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
-    tidyr::nest(-multiplet)
+    tidyr::nest(data = c(connections))
   
   data <- dplyr::full_join(detected, known, by = "multiplet")
   
@@ -78,7 +78,7 @@ test_that("check that .fn outputs the expected result", {
     to = c("B", "C", "B", "C", "D", "C", "D")
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
-    tidyr::nest(-multiplet)
+    tidyr::nest(data = c(connections))
   
   known <- tibble::tibble(
     multiplet = sort(c(LETTERS[1], rep(LETTERS[2], 6))),
@@ -86,7 +86,7 @@ test_that("check that .fn outputs the expected result", {
     to = c("B", "B", "C", "D", "C", "D", "D")
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
-    tidyr::nest(-multiplet)
+    tidyr::nest(data = c(connections))
   
   data <- dplyr::full_join(detected, known, by = "multiplet")
   
@@ -111,7 +111,7 @@ test_that("check that .tn outputs the expected result", {
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
     dplyr::distinct() %>%
-    tidyr::nest(-sample)
+    tidyr::nest(data = c(connections))
   
   known <- CIMseq::getEdgesForMultiplet(
     CIMseqSwarm_test, CIMseqSinglets_test, CIMseqMultiplets_test, 
@@ -119,7 +119,7 @@ test_that("check that .tn outputs the expected result", {
   ) %>%
     tidyr::unite(connections, from, to, sep = "-") %>%
     dplyr::distinct() %>%
-    tidyr::nest(-sample)
+    tidyr::nest(data = c(connections))
   
   data <- dplyr::full_join(detected, known, by = "sample")
   

@@ -30,7 +30,7 @@ checkResults <- function(
   swarm, known, singlets, multiplets, ...
 ){
   connections <- from <- to <- tp <- fn <- tn <- fp <- data.x <- NULL
-  data.y <- NULL
+  data.y <- cells <- data.detected <- data.expected <- NULL
   
   detected <- CIMseq::getCellsForMultiplet(
     swarm, singlets, multiplets
@@ -318,7 +318,8 @@ setupPlate <- function(
   fill = NULL,
   ...
 ){
-  cellNumber <- cellTypes <- NULL
+  cellNumber <- cellTypes <- connections <- fractions <- NULL
+  
   #make CIMseqSwarm slot for CIMseqSwarm object
   u.classes <- pull(plateData, cellTypes) %>%
     str_split(., "-") %>%
@@ -339,7 +340,7 @@ setupPlate <- function(
       data.frame(sample = s, m, stringsAsFactors = FALSE)
     })) %>%
     select(fractions) %>%
-    unnest() %>%
+    unnest(cols = c(fractions)) %>%
     as.data.frame() %>%
     column_to_rownames("sample") %>%
     as.matrix()
