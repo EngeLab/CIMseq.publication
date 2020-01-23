@@ -1,4 +1,4 @@
 library(testthat)
-library(CIMseq.testing)
+library(CIMseq.publication)
 
-test_check("CIMseq.testing")
+test_check("CIMseq.publication")
